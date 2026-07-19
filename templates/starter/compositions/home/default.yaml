@@ -1,0 +1,12 @@
+surface: home
+slots:
+  - id: hero
+    moduleKind: hero
+    fields:
+      eyebrow: "New"
+      title: "Welcome to __NAME__"
+      description: "Tell your customers what makes this experience worth staying for."
+      imageUrl: "asset://hero.svg"
+      imageAlt: "__NAME__ hero image"
+      primaryCtaLabel: "Shop Now"
+      primaryCtaHref: "/"

@@ -1,0 +1,7 @@
+surface: home
+layout:
+  provider: hub
+  name: editorial-v1
+  intent: editorial
+theme: default
+composition: home/default

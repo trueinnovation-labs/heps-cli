@@ -1,0 +1,14 @@
+apiVersion: heps/v2alpha1
+kind: ExperiencePackage
+
+metadata:
+  id: __PACKAGE_ID__
+  name: "__NAME__"
+  version: "__VERSION__"
+  description: "A HEPS v2 design package."
+
+contributes:
+  templates:    templates/
+  compositions: compositions/
+  themes:       themes/
+  assets:       assets/
