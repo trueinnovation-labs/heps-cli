@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { readHepsPackageV2, validateHepsPackageV2 } from "@hub/heps-core";
-import type { HepsValidationIssue } from "@hub/heps-core";
+import { printGroupedIssues, errorMessage } from "../lib/printValidationIssues.js";
 
 export async function main(args: string[]): Promise<void> {
   if (args.includes("--help") || args.includes("-h")) {
@@ -28,7 +28,7 @@ export async function main(args: string[]): Promise<void> {
   try {
     pkg = readHepsPackageV2(dir);
   } catch (err) {
-    console.error(`\nBLOCKED  Could not read package\n  ${message(err)}\n`);
+    console.error(`\nBLOCKED  Could not read package\n  ${errorMessage(err)}\n`);
     process.exit(1);
   }
 
@@ -38,12 +38,12 @@ export async function main(args: string[]): Promise<void> {
 
   if (warnings.length > 0) {
     console.log("\nWarnings:");
-    printGrouped(warnings);
+    printGroupedIssues(warnings);
   }
 
   if (!result.valid) {
     console.error(`\nBLOCKED  ${errors.length} validation error${errors.length === 1 ? "" : "s"}\n`);
-    printGrouped(errors);
+    printGroupedIssues(errors);
     console.error("");
     process.exit(1);
   }
@@ -55,30 +55,6 @@ export async function main(args: string[]): Promise<void> {
   console.log(`  Themes      : ${pkg.themes.length}`);
   console.log(`  Assets      : ${pkg.assetFiles.length}`);
   console.log("");
-}
-
-function printGrouped(issues: readonly HepsValidationIssue[]): void {
-  const byPath = new Map<string, HepsValidationIssue[]>();
-  for (const issue of issues) {
-    const list = byPath.get(issue.path) ?? [];
-    list.push(issue);
-    byPath.set(issue.path, list);
-  }
-
-  const paths = Array.from(byPath.keys()).sort();
-  for (const p of paths) {
-    console.log(`${p}`);
-    const sorted = byPath.get(p)!.sort((a, b) => a.code.localeCompare(b.code));
-    for (const issue of sorted) {
-      const marker = issue.severity === "error" ? "✗" : "⚠";
-      console.log(`  ${marker} ${issue.code}: ${issue.message}`);
-      if (issue.suggestion) console.log(`    → ${issue.suggestion}`);
-    }
-  }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 function printHelp(): void {
