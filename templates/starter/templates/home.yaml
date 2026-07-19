@@ -1,7 +1,12 @@
 surface: home
+# Layout used for this surface. "hub" layouts are built into the HUB you
+# install into — available names: editorial-v1, listing-v1, commerce-v1,
+# minimal-v1. "intent" is a hint for editorial tooling, not a rendering rule.
 layout:
   provider: hub
   name: editorial-v1
   intent: editorial
 theme: default
+# Points at compositions/home/default.yaml — the "composition" path is
+# relative to compositions/ and never includes the .yaml extension.
 composition: home/default
