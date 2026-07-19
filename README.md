@@ -2,9 +2,9 @@
 
 **Version 0.3.0** · Node ≥18 · MIT
 
-Create, check, and build [HEPS-100](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/heps-100.md) v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
+Create, check, and build [HEPS-100](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
 
-This CLI is deliberately small: it authors and validates the package *format*. It has no HUB runtime, no module registry, no installer — those live in the HUB repository, on purpose. See [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/known-decisions.md#the-standalone-cli-will-never-get-heps-install-or-heps-uninstall) for why that boundary is permanent, not a gap.
+This CLI is deliberately small: it authors and validates the package *format*. It has no HUB runtime, no module registry, no installer — those live in the HUB repository, on purpose. See [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/known-decisions.md#the-standalone-cli-will-never-get-heps-install-or-heps-uninstall) for why that boundary is permanent, not a gap.
 
 ---
 
@@ -22,10 +22,10 @@ If you're looking for how to install a built package into a HUB, or what a valid
 
 Not published to a registry yet — build from source.
 
-**Prerequisite:** `@hub/heps-core` is not published either — it's linked as a local `file:` dependency, so the HUB repository must be cloned as a **sibling directory** named exactly `magento-next-hub`. The HEPS work (including `packages/heps-core`) currently lives on the `feature/m32` branch, not yet merged to `main` — clone that branch explicitly:
+**Prerequisite:** `@hub/heps-core` is not published either — it's linked as a local `file:` dependency, so the HUB repository must be cloned as a **sibling directory** named exactly `magento-next-hub`:
 
 ```bash
-git clone -b feature/m32 git@github.com:trueinnovation-labs/edge-delivery-commerce-hub.git magento-next-hub
+git clone git@github.com:trueinnovation-labs/edge-delivery-commerce-hub.git magento-next-hub
 git clone git@github.com:trueinnovation-labs/heps-cli.git
 
 # both directories side by side:
@@ -43,7 +43,7 @@ npm install
 npm run build
 ```
 
-`npm install`/`tsc` in `heps-cli` will fail to resolve `@hub/heps-core` if you skip building it first, or if you cloned `main` instead of `feature/m32` (which doesn't have `packages/heps-core` at all yet).
+`npm install`/`tsc` in `heps-cli` will fail to resolve `@hub/heps-core` if you skip building it first.
 
 Then either run it directly:
 
@@ -133,11 +133,11 @@ Building the same package twice replaces the previous output cleanly; a failed b
 
 Everything past `heps build` — installing into a HUB, the Campaign-First delivery model, every validation error and what it means, and the complete HEPS-100 format spec — lives in the HUB repository:
 
-- [Getting Started](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/getting-started.md) — the full walkthrough, this CLI through to a rendered browser page
-- [Agency Workflow](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/agency-workflow.md) — complete package structure reference, every command on both sides
-- [Troubleshooting](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/troubleshooting.md) — every validation code
-- [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/known-decisions.md) — deliberate scope boundaries, including this CLI's
-- [HEPS-100 Spec](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/feature/m32/docs/heps/heps-100.md) — complete format reference
+- [Getting Started](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/getting-started.md) — the full walkthrough, this CLI through to a rendered browser page
+- [Agency Workflow](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/agency-workflow.md) — complete package structure reference, every command on both sides
+- [Troubleshooting](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/troubleshooting.md) — every validation code
+- [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/known-decisions.md) — deliberate scope boundaries, including this CLI's
+- [HEPS-100 Spec](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) — complete format reference
 
 ---
 
