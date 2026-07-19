@@ -1,0 +1,30 @@
+{
+  "name": "@heps/cli",
+  "version": "0.3.0",
+  "description": "HEPS CLI — create, check and build HEPS v2 design packages.",
+  "type": "module",
+  "bin": {
+    "heps": "./bin/heps.js"
+  },
+  "scripts": {
+    "build":          "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "templates/"
+  ],
+  "keywords": ["heps", "commerce", "experience", "theme", "cli"],
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "@hub/heps-core": "file:../magento-next-hub/packages/heps-core",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

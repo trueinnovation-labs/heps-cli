@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CLI: Build TypeScript",
+      "type": "shell",
+      "command": "npm run build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$tsc",
+      "detail": "Compile src/ → dist/ (tsc)"
+    }
+  ]
+}
