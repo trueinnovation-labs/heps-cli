@@ -26,7 +26,7 @@ Not published to a registry yet — build from source.
 
 ```bash
 git clone -b feature/m32 git@github.com:trueinnovation-labs/edge-delivery-commerce-hub.git magento-next-hub
-git clone git@github.com:ruhartm/heps-cli.git
+git clone git@github.com:trueinnovation-labs/heps-cli.git
 
 # both directories side by side:
 #   ./magento-next-hub/
