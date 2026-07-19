@@ -35,7 +35,10 @@ export async function main(args: string[]): Promise<void> {
   const version = pkg.manifest.metadata.version;
   const buildName = `${packageId}-${version}`;
 
-  const distRoot = path.join(process.cwd(), "dist");
+  // Output always lands next to the package, not relative to wherever the
+  // command happened to be invoked from — `heps build my-brand` and
+  // `(cd my-brand && heps build)` must produce the identical absolute path.
+  const distRoot = path.join(path.dirname(sourceDir), "dist");
   fs.mkdirSync(distRoot, { recursive: true });
 
   const finalDir = path.join(distRoot, buildName);
@@ -132,7 +135,11 @@ Arguments:
   dir   Package directory. Default: current directory
 
 Output:
-  dist/<package-id>-<version>/   (relative to the current directory)
+  <package-parent>/dist/<package-id>-<version>/
+
+  Always next to the package directory, never inside it — invoking
+  from outside ("heps build my-brand") or from inside ("cd my-brand
+  && heps build") produces the identical absolute output path.
 
 Only the canonical HEPS v2 structures are copied — package.yaml,
 templates/, compositions/, themes/, assets/. Everything else in the
