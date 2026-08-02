@@ -1,0 +1,18 @@
+# Deliberately minimal — one region, one slot. Just enough to prove the
+# Layout Contract's Binding Rule (every SlotNode.slot must exist in the
+# paired composition) round-trips through `heps build` unchanged.
+id: golden-layout
+version: 1
+surfaces:
+  - category
+root:
+  arrangement: stack
+  children:
+    - region:
+        id: golden.content-section
+        arrangement: stack
+        children:
+          - slot: golden.content
+
+regions:
+  golden.content: { label: "Golden Content" }

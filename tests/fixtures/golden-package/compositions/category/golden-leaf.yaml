@@ -1,0 +1,7 @@
+surface: category
+entityKey: golden-leaf
+slots:
+  - id: golden.content
+    moduleKind: test-placeholder
+    fields:
+      title: "Golden Fixture Content"

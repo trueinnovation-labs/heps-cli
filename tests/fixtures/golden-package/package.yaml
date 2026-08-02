@@ -1,0 +1,22 @@
+apiVersion: heps/v2alpha1
+kind: ExperiencePackage
+
+metadata:
+  id: heps.test.golden
+  name: Golden Fixture
+  version: 1.0.0
+  description: >
+    Minimal, self-contained HEPS v2 package used by the CLI's own test
+    suite to prove `heps build` never drops a canonical contribution
+    directory (PR1 — CLI/Core Contract Parity). Not a real design —
+    every field here is deliberately minimal, just enough to pass
+    validation while still exercising every canonical directory,
+    including layouts/, the one this fixture exists to protect.
+  author: HEPS CLI Test Suite
+
+contributes:
+  templates:    templates/
+  layouts:      layouts/
+  compositions: compositions/
+  themes:       themes/
+  assets:       assets/

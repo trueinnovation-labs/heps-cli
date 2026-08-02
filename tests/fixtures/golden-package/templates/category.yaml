@@ -1,0 +1,7 @@
+surface: category
+layout:
+  provider: hub
+  name: golden-layout
+theme: default
+compositions:
+  golden-leaf: category/golden-leaf

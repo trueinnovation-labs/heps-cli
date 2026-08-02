@@ -2,14 +2,24 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
-import { readHepsPackageV2, validateHepsPackageV2 } from "@hub/heps-core";
+import { readHepsPackageV2, validateHepsPackageV2, HEPS_V2_PACKAGE_ENTRIES } from "@hub/heps-core";
 import type { LoadedHepsPackageV2, HepsValidationIssue } from "@hub/heps-core";
 import { printGroupedIssues, errorMessage } from "../lib/printValidationIssues.js";
 
 // The only HEPS v2 package structures ever copied into a build output.
 // A whitelist, not a blacklist — node_modules/.git/dist/stray files are
 // excluded by construction, not by pattern-matching them away.
-const PACKAGE_ENTRIES = ["package.yaml", "templates", "compositions", "themes", "assets"];
+//
+// PR1 — HEPS CLI/Core Contract Parity: this used to be a second,
+// independently-maintained copy of this list, which is exactly how
+// layouts/ silently stopped being copied here after the Layout Contract
+// added it to readHepsPackageV2 (and therefore to what `heps check`
+// accepts as valid) — the two lists agreed the day both were written and
+// diverged the day only one of them was updated. Importing Core's own
+// list instead of hardcoding a second one makes that class of bug
+// structurally impossible: whatever `heps check` accepts, `heps build`
+// now copies, by construction, not by remembering to keep two lists in sync.
+const PACKAGE_ENTRIES = HEPS_V2_PACKAGE_ENTRIES;
 
 type ReadAndValidateResult =
   | { ok: true; pkg: LoadedHepsPackageV2 }
@@ -125,6 +135,11 @@ function randomSuffix(): string {
 }
 
 function printHelp(): void {
+  // Derived from PACKAGE_ENTRIES (Core's own list), not retyped here —
+  // this text can't go stale the way the old hardcoded copy of it did.
+  const entriesList = PACKAGE_ENTRIES
+    .map((e) => (e === "package.yaml" ? e : `${e}/`))
+    .join(", ");
   console.log(`
 heps build [dir]
 
@@ -141,9 +156,9 @@ Output:
   from outside ("heps build my-brand") or from inside ("cd my-brand
   && heps build") produces the identical absolute output path.
 
-Only the canonical HEPS v2 structures are copied — package.yaml,
-templates/, compositions/, themes/, assets/. Everything else in the
-source directory (node_modules, .git, stray files) is left behind.
+Only the canonical HEPS v2 structures are copied — ${entriesList}.
+Everything else in the source directory (node_modules, .git, stray
+files) is left behind.
 
 Exit codes:
   0  Build succeeded
