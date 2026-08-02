@@ -1,0 +1,12 @@
+surface: category
+slots:
+  # category-promo-banner is a real, existing HUB module — run
+  # `npm run heps -- list:modules` in the HUB repo to confirm it's
+  # registered there before you install this. title and description are
+  # its two required fields; eyebrow is optional.
+  - id: category.intro
+    moduleKind: category-promo-banner
+    fields:
+      eyebrow: "Category"
+      title: "Commerce Category Starter"
+      description: "Tell your customers what makes this category worth browsing. The product grid below is rendered live from your connected commerce backend."

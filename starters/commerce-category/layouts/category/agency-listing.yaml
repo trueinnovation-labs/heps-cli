@@ -1,0 +1,41 @@
+# This package owns its Category layout — "agency-listing" is not one of
+# the HUB's built-in layouts (editorial-v1/listing-v1/commerce-v1/minimal-v1).
+#
+# Two different kinds of region live here, and the difference is the whole
+# point of this starter:
+#
+#   - `slot`   — content THIS package authors, via compositions/. The one
+#                slot below (category.intro) is bound to a real, existing
+#                HUB module (category-promo-banner), not a placeholder.
+#   - `outlet` — content the HUB Runtime renders from the connected
+#                backend's live product catalog. A package never authors
+#                what's inside an outlet, only declares that it exists
+#                here. productNavigation (product count + filters) and
+#                listingContent (the product grid itself) are the two
+#                outlets the HUB provides for the category surface — see
+#                the Layout Contract's Surface Outlet Registry.
+id: agency-listing
+version: 1
+surfaces:
+  - category
+root:
+  arrangement: stack
+  children:
+    - region:
+        id: category.intro-section
+        arrangement: stack
+        children:
+          - slot: category.intro
+    - region:
+        id: category.navigation-section
+        arrangement: stack
+        children:
+          - outlet: productNavigation
+    - region:
+        id: category.listing-section
+        arrangement: stack
+        children:
+          - outlet: listingContent
+
+regions:
+  category.intro: { label: "Category Intro" }

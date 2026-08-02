@@ -1,0 +1,16 @@
+apiVersion: heps/v2alpha1
+kind: ExperiencePackage
+
+metadata:
+  id: agency.minimal-starter
+  name: "Minimal Starter"
+  version: "1.0.0"
+  description: "A minimal HEPS v2 design package — one Home template, one Composition, one Theme. Copy this, rename it, and go from here."
+
+# Default directory names — the folder layout below IS the contract, no
+# code required. Only override these if you actually rename a directory.
+contributes:
+  templates:    templates/
+  compositions: compositions/
+  themes:       themes/
+  assets:       assets/

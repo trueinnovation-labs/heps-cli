@@ -1,0 +1,16 @@
+surface: home
+slots:
+  # "id" must be one of the module's allowed slots, and "moduleKind" must be
+  # a module registered on the HUB you install into. Run
+  # `npm run heps -- list:modules` in the HUB repo to see what's available —
+  # only modules that show up there can be referenced here.
+  - id: hero
+    moduleKind: hero
+    fields:
+      eyebrow: "New"
+      title: "Welcome to Minimal Starter"
+      description: "Tell your customers what makes this experience worth staying for."
+      imageUrl: "asset://hero.svg"
+      imageAlt: "Minimal Starter hero image"
+      primaryCtaLabel: "Shop Now"
+      primaryCtaHref: "/"
