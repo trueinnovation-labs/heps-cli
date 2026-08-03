@@ -30,10 +30,14 @@ Five files, each with one job, wired together in this order:
    `heps check` time, not just a convention.
 4. **`themes/default/tokens.json`** + **`themes/default/overrides.css`** —
    design tokens and a small, scoped CSS override the template's `theme:
-   default` points at. `tokens.json` here only shows `color` — that's
-   this starter demonstrating a minimal working set, not the full list of
-   tokens the HUB reads. A complete, published token contract is planned
-   but doesn't exist yet.
+   default` points at. `tokens.json` here only shows `color` — this
+   starter demonstrating a minimal working set, not a restricted one:
+   `tokens.json` uses an open token namespace. Every dot-separated path
+   is emitted as a scoped CSS custom property, for example
+   `color.brand.primary` becomes `--color-brand-primary`. HEPS does not
+   currently enforce a fixed token vocabulary; whether a token changes a
+   visible component depends on whether the target HUB's styles consume
+   that variable.
 5. **`assets/`** — package-owned files, referenced from composition fields
    as `asset://<path>`. Unused in this starter (the intro slot is
    text-only) but part of the canonical contract regardless.

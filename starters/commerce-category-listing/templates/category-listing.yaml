@@ -6,8 +6,10 @@ surface: category
 # `provider: hub` looks like it means "built into the HUB," but it means
 # "rendered by the HUB" — every layout is rendered by the HUB, including
 # this package-owned one (layouts/category/agency-listing.yaml, right
-# below). There is no other provider value; this field names the
-# renderer, not who authored the layout.
+# below). This field names the renderer, not who authored the layout.
+# `hub` is the only provider used by this starter and the only provider
+# that validates cleanly today. Other values are accepted with a
+# warning, not as a supported production path.
 layout:
   provider: hub
   name: agency-listing
