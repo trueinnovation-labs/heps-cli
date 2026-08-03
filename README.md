@@ -124,10 +124,12 @@ Read-only design overview — no validation (see `heps check` for that), no HUB 
 heps inspect summer-sale
 ```
 
-Two advisory warnings, never blocking — HEPS's token namespace is open by design (see [`docs/design-contract.md`](./docs/design-contract.md)), so this never rejects a token or selector as "unknown":
+Four advisory warnings, never blocking — HEPS's token namespace is open by design (see [`docs/design-contract.md`](./docs/design-contract.md)), so this never rejects a token or selector as "unknown":
 
 - `UNUSED_LOCAL_TOKEN` — a token is defined in `tokens.json` but this theme's own `overrides.css` never references its generated CSS variable.
+- `UNDEFINED_TOKEN_REFERENCE` — `overrides.css` references a CSS variable no token in `tokens.json` actually produces.
 - `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
+- `UNDOCUMENTED_DESIGN_SELECTOR` — `overrides.css` uses a selector that isn't part of the [Design Surface Registry](./docs/contracts/design-surfaces/) (today: `category-listing` only — a package targeting a different surface won't be checked against it).
 
 ---
 

@@ -102,3 +102,59 @@ test("invalid package: malformed package.yaml is BLOCKED with a clear message, n
   assert.match(stderr, /Could not read package/);
   assert.doesNotMatch(stderr, /at Object\.<anonymous>/, "should print a clean message, not a raw stack trace");
 });
+
+// ── DESIGN-01 cross-check: UNDOCUMENTED_DESIGN_SELECTOR / UNDEFINED_TOKEN_REFERENCE ──
+
+function copyStarterTo(name, destDir) {
+  fs.cpSync(path.join(STARTERS_ROOT, name), destDir, { recursive: true });
+}
+
+test("commerce-category-listing: registered selectors and defined token references produce no new warnings", () => {
+  const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
+  assert.doesNotMatch(out, /UNDOCUMENTED_DESIGN_SELECTOR/);
+  assert.doesNotMatch(out, /UNDEFINED_TOKEN_REFERENCE/);
+});
+
+test("an unregistered selector in overrides.css is warned about (UNDOCUMENTED_DESIGN_SELECTOR)", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  fs.appendFileSync(
+    path.join(dir, "themes", "default", "overrides.css"),
+    "\n.foo-card {\n  color: red;\n}\n",
+  );
+  const out = runCli(["inspect", dir]);
+  assert.match(out, /UNDOCUMENTED_DESIGN_SELECTOR\s+Selector ".foo-card" is not part of the current category-listing design surface registry\./);
+});
+
+test("a CSS variable with no matching token is warned about (UNDEFINED_TOKEN_REFERENCE)", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  fs.appendFileSync(
+    path.join(dir, "themes", "default", "overrides.css"),
+    "\n.product-teaser-card {\n  border-radius: var(--radius-card);\n}\n",
+  );
+  const out = runCli(["inspect", dir]);
+  assert.match(out, /UNDEFINED_TOKEN_REFERENCE\s+CSS references "--radius-card", but no matching token path exists in tokens\.json\./);
+});
+
+test("a defined token referenced normally does not trigger UNDEFINED_TOKEN_REFERENCE", () => {
+  const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
+  assert.doesNotMatch(out, /UNDEFINED_TOKEN_REFERENCE.*--color-primary\b/);
+});
+
+test("a missing or invalid registry file produces a clear note, not a crash (loadDesignSurfaceRegistry, direct)", async () => {
+  const { loadDesignSurfaceRegistry } = await import(
+    path.join(__dirname, "..", "dist", "commands", "inspect.js")
+  );
+
+  const missing = loadDesignSurfaceRegistry(path.join(tmpDir(), "does-not-exist.json"));
+  assert.equal(missing.selectors.size, 0);
+  assert.match(missing.error, /not found/);
+
+  const invalidDir = tmpDir();
+  const invalidPath = path.join(invalidDir, "broken.json");
+  fs.writeFileSync(invalidPath, "{ not valid json");
+  const invalid = loadDesignSurfaceRegistry(invalidPath);
+  assert.equal(invalid.selectors.size, 0);
+  assert.match(invalid.error, /could not be read/);
+});

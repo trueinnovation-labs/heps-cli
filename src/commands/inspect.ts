@@ -10,6 +10,21 @@ import type {
   HepsTokenLeaf,
 } from "../sdk/index.js";
 import { errorMessage } from "../lib/printValidationIssues.js";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Fixed for now, deliberately — there is exactly one Design Surface
+// Registry today (docs/contracts/design-surfaces/category-listing.json,
+// see DESIGN-01). No auto-discovery, no assumption that every `category`
+// surface shares it: a different category layout could have a
+// completely different Slot/Outlet shape and would need its own
+// registry, not this one silently applied to it. Warning text below
+// names this registry explicitly so a package this doesn't apply to
+// reads as "not part of this specific registry," not "rejected by HEPS."
+const CATEGORY_LISTING_REGISTRY_PATH = path.resolve(
+  __dirname, "..", "..", "docs", "contracts", "design-surfaces", "category-listing.json",
+);
 
 export async function main(args: string[]): Promise<void> {
   if (args.includes("--help") || args.includes("-h")) {
@@ -45,6 +60,7 @@ export async function main(args: string[]): Promise<void> {
 // ── Report ────────────────────────────────────────────────────────────────────
 
 function printReport(pkg: LoadedHepsPackageV2): void {
+  const registry = loadDesignSurfaceRegistry(CATEGORY_LISTING_REGISTRY_PATH);
   const lines: string[] = [];
 
   lines.push("HEPS Design");
@@ -126,9 +142,14 @@ function printReport(pkg: LoadedHepsPackageV2): void {
     }
 
     warningLines.push(...buildTokenWarnings(tokenPairs, theme.overridesCss ?? ""));
+    warningLines.push(...buildUndefinedTokenReferenceWarnings(tokenPairs, theme.overridesCss ?? ""));
+    warningLines.push(...buildUndocumentedSelectorWarnings(selectors, registry));
   }
 
   warningLines.push(...buildAssetWarnings(pkg));
+  if (registry.error) {
+    warningLines.push(`  DESIGN_SURFACE_REGISTRY_UNAVAILABLE  ${registry.error}`);
+  }
 
   console.log(lines.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd());
   console.log("");
@@ -138,6 +159,8 @@ function printReport(pkg: LoadedHepsPackageV2): void {
   } else {
     for (const w of warningLines) console.log(w);
   }
+  console.log("");
+  console.log(warningLines.length === 0 ? "Inspect complete" : "Inspect complete with warnings");
   console.log("");
 }
 
@@ -229,6 +252,56 @@ function buildAssetWarnings(pkg: LoadedHepsPackageV2): string[] {
     .map((f) => `  UNREFERENCED_ASSET  ${f} exists but is not referenced by any composition field.`);
 }
 
+/** Every `var(--name` this CSS references, regardless of a fallback value after a comma. */
+function extractReferencedVars(css: string): string[] {
+  const names = new Set<string>();
+  for (const match of css.matchAll(/var\(\s*(--[\w-]+)/g)) {
+    names.add(match[1]!);
+  }
+  return [...names].sort();
+}
+
+function buildUndefinedTokenReferenceWarnings(
+  tokenPairs: Array<[string, string]>,
+  overridesCss: string,
+): string[] {
+  const definedVarNames = new Set(tokenPairs.map(([dotPath]) => `--${dotPath.replace(/\./g, "-")}`));
+  return extractReferencedVars(overridesCss)
+    .filter((varName) => !definedVarNames.has(varName))
+    .map((varName) => `  UNDEFINED_TOKEN_REFERENCE  CSS references "${varName}", but no matching token path exists in tokens.json.`);
+}
+
+// ── Design Surface Registry cross-check (DESIGN-01) ──────────────────────────
+
+type DesignSurfaceRegistry = { selectors: Set<string>; error?: string };
+
+/**
+ * Exported (not just used internally) so tests can point this at a bogus
+ * path directly, rather than renaming the real, shared registry file out
+ * from under other tests/processes that read it concurrently.
+ */
+export function loadDesignSurfaceRegistry(registryPath: string): DesignSurfaceRegistry {
+  if (!fs.existsSync(registryPath)) {
+    return { selectors: new Set(), error: "category-listing design surface registry not found — skipping selector cross-check." };
+  }
+  try {
+    const raw = JSON.parse(fs.readFileSync(registryPath, "utf8")) as Record<string, { selector: string }>;
+    return { selectors: new Set(Object.values(raw).map((entry) => entry.selector)) };
+  } catch (err) {
+    return {
+      selectors: new Set(),
+      error: `category-listing design surface registry could not be read (${errorMessage(err)}) — skipping selector cross-check.`,
+    };
+  }
+}
+
+function buildUndocumentedSelectorWarnings(selectors: string[], registry: DesignSurfaceRegistry): string[] {
+  if (registry.selectors.size === 0) return [];
+  return selectors
+    .filter((selector) => !registry.selectors.has(selector))
+    .map((selector) => `  UNDOCUMENTED_DESIGN_SELECTOR  Selector "${selector}" is not part of the current category-listing design surface registry.`);
+}
+
 function stem(filePath: string): string {
   return filePath.replace(/\.ya?ml$/, "");
 }
@@ -240,15 +313,28 @@ heps inspect [dir]
 Read-only design overview of a HEPS v2 package: Template -> Layout ->
 Composition -> Theme bindings, Slots, Outlets, module kinds, tokens,
 their generated CSS variables, the CSS selectors actually used, and
-assets — plus advisory warnings for a token this package's own CSS never
-references, or an asset file no composition field references.
+assets.
 
 Arguments:
   dir   Package directory. Default: current directory
 
-This never validates the package (see "heps check" for that), never
-contacts a HUB, and never rejects a token or CSS selector — HEPS's token
-namespace is open by design (see docs/design-contract.md). Warnings here
-are advisory only.
+Advisory warnings only — never blocking, never a nonzero exit code on
+their own, never rejecting a token or CSS selector as categorically
+"unknown" (HEPS's token namespace is open by design, see
+docs/design-contract.md):
+
+  UNUSED_LOCAL_TOKEN          a token is defined but this theme's own
+                              overrides.css never references it
+  UNDEFINED_TOKEN_REFERENCE   overrides.css references a CSS variable
+                              no token in tokens.json actually produces
+  UNREFERENCED_ASSET          a file under assets/ no composition field
+                              references
+  UNDOCUMENTED_DESIGN_SELECTOR  overrides.css uses a selector that
+                              isn't part of the (currently
+                              category-listing-only) Design Surface
+                              Registry — docs/contracts/design-surfaces/
+
+This never validates the package (see "heps check" for that) and never
+contacts a HUB.
 `);
 }
