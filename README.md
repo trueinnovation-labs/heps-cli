@@ -132,6 +132,13 @@ Building the same package twice replaces the previous output cleanly; a failed b
 
 ---
 
+## What HEPS guarantees
+
+[`docs/design-contract.md`](./docs/design-contract.md) — what belongs to
+you, what belongs to the HUB, what `heps check` actually enforces vs.
+what's convention, grounded in `@hub/heps-core`'s own exports so it can
+never drift further from the code than this document lets it.
+
 ## Full documentation
 
 Everything past `heps build` — installing into a HUB, the Campaign-First delivery model, every validation error and what it means, and the complete HEPS-100 format spec — lives in the HUB repository:
