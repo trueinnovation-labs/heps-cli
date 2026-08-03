@@ -289,6 +289,11 @@ never the Outlets.
   is internal implementation and can change without notice. A public,
   HEPS-level CSS Hook Contract that any HUB could commit to the same way
   is still a real gap (see "What this is (and isn't)").
+  `docs/contracts/design-surfaces/category-listing.json` gives these six
+  a stable semantic name (`listing.card.price`, etc.) separate from the
+  selector — DESIGN-01, the first step toward that gap not mattering as
+  much, since the name an agency learns wouldn't have to change even
+  when the selector eventually does.
 
 **Example:** [`starters/commerce-category-listing/themes/default/tokens.json`](../starters/commerce-category-listing/themes/default/tokens.json), [`overrides.css`](../starters/commerce-category-listing/themes/default/overrides.css)
 

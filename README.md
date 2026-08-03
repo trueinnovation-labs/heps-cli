@@ -138,6 +138,12 @@ you, what belongs to the HUB, what `heps check` actually enforces vs.
 what's convention, grounded in this CLI's own `src/sdk/` exports so it
 can never drift further from the code than this document lets it.
 
+[`docs/contracts/design-surfaces/`](./docs/contracts/design-surfaces/) —
+a stable semantic name (`listing.card.price`) for each already-committed
+CSS selector, so the name an agency learns can outlive the implementation
+class behind it. Only lists what's already real and tested — see that
+folder's own README for the rule.
+
 ## Full documentation
 
 Everything past `heps build` — installing into a HUB, the Campaign-First delivery model, every validation error and what it means, and the complete HEPS-100 format spec — lives in the HUB repository:

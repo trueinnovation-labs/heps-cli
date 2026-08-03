@@ -1,0 +1,21 @@
+{
+  "listing.hero.title": {
+    "selector": ".category-promo-banner__title",
+    "source": "Law 16 module: category-promo-banner"
+  },
+  "listing.navigation": {
+    "selector": ".category-product-nav"
+  },
+  "listing.grid": {
+    "selector": ".category-product-listing-grid"
+  },
+  "listing.card": {
+    "selector": ".product-teaser-card"
+  },
+  "listing.card.image": {
+    "selector": ".product-teaser-card__image"
+  },
+  "listing.card.price": {
+    "selector": ".product-teaser-card__price"
+  }
+}
