@@ -30,7 +30,10 @@ Five files, each with one job, wired together in this order:
    `heps check` time, not just a convention.
 4. **`themes/default/tokens.json`** + **`themes/default/overrides.css`** —
    design tokens and a small, scoped CSS override the template's `theme:
-   default` points at.
+   default` points at. `tokens.json` here only shows `color` — that's
+   this starter demonstrating a minimal working set, not the full list of
+   tokens the HUB reads. A complete, published token contract is planned
+   but doesn't exist yet.
 5. **`assets/`** — package-owned files, referenced from composition fields
    as `asset://<path>`. Unused in this starter (the intro slot is
    text-only) but part of the canonical contract regardless.
@@ -61,7 +64,11 @@ Then, at minimum:
    `compositions/category/default.yaml` — omitted here on purpose so this
    starter isn't tied to any one commerce backend's category tree.
 4. Adjust `layouts/category/agency-listing.yaml` if you want a different
-   structure — add more slots, reorder the outlets, and so on.
+   structure — add more slots, reorder the outlets, and so on. Every
+   region in this starter uses `arrangement: stack` (top-to-bottom).
+   `arrangement: columns` also exists (side-by-side, CSS-grid-based) —
+   this starter just doesn't happen to need it. Nesting a `region` inside
+   a `region` is allowed too, to any depth.
 
 Then validate:
 
@@ -71,7 +78,10 @@ heps build .
 heps check dist/<package-id>-<version>
 ```
 
-`category-promo-banner` (the one module this starter uses) is a real,
-existing HUB module — confirm it's registered on the HUB you're
-targeting with `npm run heps -- list:modules` in the HUB repo before you
-install this there.
+`category-promo-banner` (the one module this starter uses) is a real HUB
+module — but which modules exist, and which fields each one accepts, is
+a fact about the specific HUB you're installing to, not something this
+CLI or this starter can check. Module availability has to be confirmed
+by whoever operates that HUB before you install there. A public
+module/field contract you could check yourself, without asking anyone,
+is planned but doesn't exist yet.

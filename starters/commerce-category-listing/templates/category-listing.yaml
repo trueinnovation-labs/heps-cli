@@ -2,6 +2,12 @@ surface: category
 # Package-owned layout — not one of the HUB's built-in ones. This is what
 # makes this starter different from the minimal one: a real design brings
 # its own category structure instead of reusing a generic built-in layout.
+#
+# `provider: hub` looks like it means "built into the HUB," but it means
+# "rendered by the HUB" — every layout is rendered by the HUB, including
+# this package-owned one (layouts/category/agency-listing.yaml, right
+# below). There is no other provider value; this field names the
+# renderer, not who authored the layout.
 layout:
   provider: hub
   name: agency-listing

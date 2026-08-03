@@ -1,9 +1,11 @@
 surface: category
 slots:
-  # category-promo-banner is a real, existing HUB module — run
-  # `npm run heps -- list:modules` in the HUB repo to confirm it's
-  # registered there before you install this. title and description are
-  # its two required fields; eyebrow is optional.
+  # category-promo-banner is a real HUB module. Whether it's registered
+  # on the specific HUB you're installing to has to be confirmed by that
+  # HUB's operator — this starter and the CLI have no way to check that
+  # themselves. This starter demonstrates title and description (its two
+  # required fields) and eyebrow (optional) only — it has more fields
+  # than that, but a full, published field contract doesn't exist yet.
   - id: category.intro
     moduleKind: category-promo-banner
     fields:

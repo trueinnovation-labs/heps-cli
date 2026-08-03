@@ -1,7 +1,17 @@
+# "alpha1" is honest, not decorative: this format can still change in
+# ways that break existing packages. Fine for starters, prototypes, and
+# real agency work today — just not a "v2 stable" guarantee yet. No
+# action needed from you; this is a statement about HEPS, not something
+# you set per-package.
 apiVersion: heps/v2alpha1
 kind: ExperiencePackage
 
 metadata:
+  # "agency" here is a namespace, not a fixed value — it's whatever
+  # `heps create --namespace <ns>` was given (default: hub.pack), joined
+  # to the project name with a dot. The dot has no meaning to HEPS beyond
+  # that join; it's a human-readable convention (whose design this is),
+  # not a validated or enforced structure.
   id: agency.commerce-category-listing-starter
   name: "Commerce Category Listing Starter"
   version: "1.0.0"
@@ -15,6 +25,8 @@ metadata:
     itself). No hardcoded products, no backend-specific keys — copy this,
     rename it, and point it at your own listing category.
 
+# Default directory names — the folder layout below IS the contract, no
+# code required. Only override these if you actually rename a directory.
 contributes:
   templates:    templates/
   layouts:      layouts/
