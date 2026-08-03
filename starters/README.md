@@ -1,20 +1,35 @@
 # Official HEPS Starters
 
-Working, `heps check`-clean HEPS v2 design packages to copy and build on
-— not templates the CLI generates for you, files you clone.
+Working, `heps check`-clean HEPS v2 design packages — the source `heps
+create` scaffolds from, and also plain files you can clone and copy by
+hand if you'd rather not install the CLI at all.
 
 | Starter | Demonstrates |
 |---|---|
-| [`minimal`](./minimal) | The smallest valid HEPS v2 package — one Home template, one Composition, one Theme. |
-| [`commerce-category`](./commerce-category) | A package-owned Layout for the Category surface, combining a package-authored slot with the two HUB-rendered commerce Outlets (product navigation + product grid). |
+| [`minimal`](./minimal) | The smallest valid HEPS v2 package — one Home template, one Composition, one Theme. Default when no `-p` is given. |
+| [`commerce-category-listing`](./commerce-category-listing) | A package-owned Layout for the Category **listing** surface, combining a package-authored slot with the two HUB-rendered commerce Outlets (product navigation + product grid). Listing categories only — see its own README. |
 
 ## Using a starter
 
-No CLI command needed yet — clone this repo and copy:
+Via the CLI (fills in your own package id/name/version automatically):
+
+```
+heps create my-design -p commerce-category-listing
+cd my-design
+heps check .
+```
+
+Omit `-p` (or pass `-p minimal`) for the minimal starter:
+
+```
+heps create my-design
+```
+
+Or by hand, without installing the CLI at all:
 
 ```
 git clone https://github.com/trueinnovation-labs/heps-cli.git
-cp -R heps-cli/starters/commerce-category my-design
+cp -R heps-cli/starters/commerce-category-listing my-design
 cd my-design
 ```
 
@@ -37,8 +52,3 @@ doesn't need a new CLI release, and an agency always gets the current
 official one from this same repo — the same reason Shopify's
 `shopify theme init` clones a theme repo rather than shipping one inside
 the CLI binary.
-
-`heps create` today still scaffolds its own small built-in default
-(unrelated to the two starters above) — pulling directly from this
-`starters/` catalog via a `heps create -p <name>` flag is a deliberate,
-separate next step, not part of this one.

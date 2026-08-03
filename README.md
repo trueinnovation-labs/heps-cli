@@ -64,15 +64,17 @@ heps create my-brand
 
 ### `heps create <name>`
 
-Scaffolds a new HEPS v2 package from a built-in starter — a real, installable package, not a stripped-down demo.
+Scaffolds a new HEPS v2 package from an official starter (`starters/` — see [the starter catalog](./starters/README.md)) — a real, installable package, not a stripped-down demo.
 
 ```bash
 heps create summer-sale --namespace my-agency
+heps create summer-sale -p commerce-category-listing
 ```
 
 ```
 ✓ Created summer-sale
 
+  Prototype : minimal
   Package ID: my-agency.pack.summer-sale
   Location  : /path/to/summer-sale
 
@@ -81,11 +83,12 @@ Next steps:
   heps check
 ```
 
-Refuses to touch an existing directory — no merge, no overwrite, no `--force`.
+Refuses to touch an existing directory — no merge, no overwrite, no `--force`. An unknown `-p` value lists the available prototypes instead of scaffolding anything.
 
 | Flag | Default | Meaning |
 |---|---|---|
 | `--namespace <ns>` | `hub.pack` | Prefix for the generated package ID |
+| `-p, --prototype <name>` | `minimal` | Which starter under `starters/` to scaffold from |
 
 ### `heps check [dir]`
 
@@ -123,7 +126,7 @@ BUILD READY
   Output     : dist/my-agency.pack.summer-sale-1.0.0
 ```
 
-Output always lands at `<package-parent-directory>/dist/<package-id>-<version>/` — next to the source directory, never inside it, regardless of whether you ran the command from inside or outside the package. Only the canonical package files (`package.yaml`, `templates/`, `compositions/`, `themes/`, `assets/`) are copied — `node_modules`, `.git`, and stray files never make it into the output.
+Output always lands at `<package-parent-directory>/dist/<package-id>-<version>/` — next to the source directory, never inside it, regardless of whether you ran the command from inside or outside the package. Only the canonical package files (`package.yaml`, `templates/`, `layouts/`, `compositions/`, `themes/`, `assets/`) are copied — `node_modules`, `.git`, and stray files never make it into the output.
 
 Building the same package twice replaces the previous output cleanly; a failed build never touches a prior good one.
 

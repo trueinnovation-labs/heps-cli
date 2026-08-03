@@ -1,11 +1,9 @@
 // PR2 — official HEPS starters.
-//
-// starters/ is the public catalog agencies clone/copy from (git clone +
-// cp -R, see starters/*/README.md) — not part of the CLI's npm package
-// (only bin/, dist/, templates/ are listed in package.json's "files").
-// This suite proves each official starter actually clears the same
-// golden flow a real agency would run: heps check, heps build, heps
-// check on the built dist output. A starter that fails this is not
+// AUD-UX-01 (heps-cli) — `heps create -p <name>` now scaffolds directly
+// from these same starters (see create.golden.test.js); this suite still
+// proves the starters themselves (as plain, clonable files) clear the
+// golden flow a real agency would run by hand: heps check, heps build,
+// heps check on the built dist output. A starter that fails this is not
 // "official" no matter what the README claims.
 
 import { test } from "node:test";
@@ -25,8 +23,8 @@ function runCli(args) {
 }
 
 const OFFICIAL_STARTERS = [
-  { name: "minimal",           packageId: "agency.minimal-starter",           version: "1.0.0", ownedDirs: ["templates", "compositions", "themes", "assets"] },
-  { name: "commerce-category", packageId: "agency.commerce-category-starter", version: "1.0.0", ownedDirs: ["templates", "layouts", "compositions", "themes", "assets"] },
+  { name: "minimal",                    packageId: "agency.minimal-starter",                    version: "1.0.0", ownedDirs: ["templates", "compositions", "themes", "assets"] },
+  { name: "commerce-category-listing",  packageId: "agency.commerce-category-listing-starter",  version: "1.0.0", ownedDirs: ["templates", "layouts", "compositions", "themes", "assets"] },
 ];
 
 test.afterEach(() => {
@@ -61,26 +59,26 @@ for (const starter of OFFICIAL_STARTERS) {
   });
 }
 
-test("commerce-category specifically: layouts/ survives the build byte-identical (the file this starter exists to prove)", () => {
-  const sourceDir = path.join(STARTERS_ROOT, "commerce-category");
+test("commerce-category-listing specifically: layouts/ survives the build byte-identical (the file this starter exists to prove)", () => {
+  const sourceDir = path.join(STARTERS_ROOT, "commerce-category-listing");
   runCli(["build", sourceDir]);
 
-  const distDir = path.join(DIST_ROOT, "agency.commerce-category-starter-1.0.0");
+  const distDir = path.join(DIST_ROOT, "agency.commerce-category-listing-starter-1.0.0");
   const sourceLayout = fs.readFileSync(path.join(sourceDir, "layouts", "category", "agency-listing.yaml"), "utf8");
   const distLayout   = fs.readFileSync(path.join(distDir, "layouts", "category", "agency-listing.yaml"), "utf8");
   assert.equal(distLayout, sourceLayout, "layouts/category/agency-listing.yaml content changed during build");
 });
 
-test("commerce-category: uses a package-owned layout, not one of the HUB's built-in ones — the whole point of this starter", () => {
+test("commerce-category-listing: uses a package-owned layout, not one of the HUB's built-in ones — the whole point of this starter", () => {
   const templateContent = fs.readFileSync(
-    path.join(STARTERS_ROOT, "commerce-category", "templates", "category-listing.yaml"),
+    path.join(STARTERS_ROOT, "commerce-category-listing", "templates", "category-listing.yaml"),
     "utf8",
   );
   const KNOWN_HUB_LAYOUTS = ["editorial-v1", "listing-v1", "commerce-v1", "minimal-v1"];
   for (const hubLayout of KNOWN_HUB_LAYOUTS) {
     assert.ok(
       !templateContent.includes(`name: ${hubLayout}`),
-      `commerce-category's template still references the built-in HUB layout "${hubLayout}" — it should reference its own layouts/category/agency-listing.yaml instead`,
+      `commerce-category-listing's template still references the built-in HUB layout "${hubLayout}" — it should reference its own layouts/category/agency-listing.yaml instead`,
     );
   }
 });

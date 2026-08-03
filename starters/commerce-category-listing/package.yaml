@@ -1,0 +1,23 @@
+apiVersion: heps/v2alpha1
+kind: ExperiencePackage
+
+metadata:
+  id: agency.commerce-category-listing-starter
+  name: "Commerce Category Listing Starter"
+  version: "1.0.0"
+  description: >
+    A HEPS v2 category LISTING design — for a leaf/product-bearing
+    category, not a top-level browse hub (Browse and Listing are
+    different runtime paths; this starter only covers Listing). Owns its
+    own Layout instead of using one of the HUB's built-in layouts, plus
+    the two Outlets the HUB Runtime renders from the connected backend's
+    real product catalog (product count/filters, then the product grid
+    itself). No hardcoded products, no backend-specific keys — copy this,
+    rename it, and point it at your own listing category.
+
+contributes:
+  templates:    templates/
+  layouts:      layouts/
+  compositions: compositions/
+  themes:       themes/
+  assets:       assets/

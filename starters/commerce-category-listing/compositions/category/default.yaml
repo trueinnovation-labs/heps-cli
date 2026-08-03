@@ -8,5 +8,5 @@ slots:
     moduleKind: category-promo-banner
     fields:
       eyebrow: "Category"
-      title: "Commerce Category Starter"
-      description: "Tell your customers what makes this category worth browsing. The product grid below is rendered live from your connected commerce backend."
+      title: "Commerce Category Listing Starter"
+      description: "Tell your customers what makes this category worth shopping. The product grid below is rendered live from your connected commerce backend."

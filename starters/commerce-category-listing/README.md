@@ -1,7 +1,15 @@
-# Commerce Category Starter
+# Commerce Category Listing Starter
 
-A HEPS v2 Category design that owns its own Layout — the pattern a real
-commerce category page needs, not a generic built-in one.
+A HEPS v2 category design that owns its own Layout — the pattern a real
+commerce category **listing** page needs, not a generic built-in one.
+
+**Listing only.** The HUB resolves a category to one of two different
+runtime paths — Browse (a top-level hub with subcategory tiles, no
+product grid) or Listing (a leaf category with real products). This
+starter's Outlets (`productNavigation`, `listingContent`) only render
+anything on a category that resolves to Listing. Point it at a Browse
+category and the product grid/filters silently render nothing — pick a
+real, product-bearing leaf category, not a top-level one.
 
 ## The file chain
 
@@ -29,8 +37,18 @@ Five files, each with one job, wired together in this order:
 
 ## Using this starter
 
+Via the CLI (creates `my-design/` in the current directory, with your own
+package id/name already filled in):
+
 ```
-cp -R starters/commerce-category my-design
+heps create my-design -p commerce-category-listing
+cd my-design
+```
+
+Or by hand, straight from a clone of this repo:
+
+```
+cp -R starters/commerce-category-listing my-design
 cd my-design
 ```
 
