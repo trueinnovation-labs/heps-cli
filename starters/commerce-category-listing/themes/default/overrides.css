@@ -1,3 +1,45 @@
+/*
+ * Six stable public CSS hooks, nothing else — see README.md "Styling
+ * this starter" for what's committed here vs. everything else in the
+ * rendered markup, which is internal implementation and may change
+ * without notice:
+ *
+ *   .category-promo-banner__title    (Law 16 module hook — category-promo-banner)
+ *   .category-product-nav            (Outlet-rendered, HUB-committed)
+ *   .category-product-listing-grid   (Outlet-rendered, HUB-committed)
+ *   .product-teaser-card             (Outlet-rendered, HUB-committed)
+ *   .product-teaser-card__image      (Outlet-rendered, HUB-committed)
+ *   .product-teaser-card__price      (Outlet-rendered, HUB-committed)
+ */
+
 .category-promo-banner {
   padding-block: 3rem;
+  background: var(--color-surface-muted);
+}
+
+.category-promo-banner__title {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.01em;
+}
+
+.category-product-nav {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.category-product-listing-grid {
+  padding-block: 1.5rem;
+  background: var(--color-surface-muted);
+}
+
+.product-teaser-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border-color: var(--color-border);
+}
+
+.product-teaser-card__price {
+  color: var(--color-primary);
+  font-weight: 600;
 }

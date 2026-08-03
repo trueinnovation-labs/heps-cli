@@ -275,13 +275,20 @@ never the Outlets.
   write becomes a real `--custom-property` — but whether the target
   HUB's own component styles actually *read* that variable is a fact
   about that HUB's CSS, not about your `tokens.json`. Producing a
-  variable is guaranteed; consumption is not.
-- Stable selectors to target inside `overrides.css`. Today the only
-  thing to select against is a HUB component's own internal
-  implementation class names (e.g. `product-teaser-card`) — not a
-  versioned, public hook contract. A future HUB release can rename
-  those classes without warning. A dedicated CSS Hook Contract (see
-  "What this is (and isn't)") is the planned fix; it doesn't exist yet.
+  variable is guaranteed; consumption is not. `starters/commerce-category-listing`'s
+  seven tokens were checked against one reference HUB's CSS and
+  confirmed consumed there — a demonstrated-working example, not a
+  guarantee for every HUB.
+- A general, HEPS-format-level CSS Hook Contract. What exists today is
+  narrower and HUB-specific: one reference HUB has committed, with its
+  own regression tests, to six selectors staying stable for the Listing
+  surface (one Composition-module hook via Law 16's `theme.elements`,
+  five more on Outlet-rendered content that Law 16 structurally can't
+  reach — see `starters/commerce-category-listing/README.md`, "Stable
+  CSS hooks"). Every other class in the rendered markup — on any HUB —
+  is internal implementation and can change without notice. A public,
+  HEPS-level CSS Hook Contract that any HUB could commit to the same way
+  is still a real gap (see "What this is (and isn't)").
 
 **Example:** [`starters/commerce-category-listing/themes/default/tokens.json`](../starters/commerce-category-listing/themes/default/tokens.json), [`overrides.css`](../starters/commerce-category-listing/themes/default/overrides.css)
 
@@ -325,7 +332,7 @@ unused in this starter — the one slot it fills is text-only).
 | Template | the binding | — | non-`hub` providers, and whether a `hub` layout name is real on the target HUB |
 | Layout | Slot/Region structure | Outlet content | whether an Outlet name is real on the target HUB |
 | Composition | slot content | module registration | `moduleKind`/field availability on target HUB |
-| Theme | tokens + CSS | which CSS vars get consumed | stable CSS hooks (don't exist yet) |
+| Theme | tokens + CSS | which CSS vars get consumed | a HEPS-level (any-HUB) CSS Hook Contract — one reference HUB commits to 6 selectors today, no general mechanism yet |
 | Assets | everything | — | (none) |
 
 ---

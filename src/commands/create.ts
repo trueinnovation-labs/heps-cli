@@ -42,7 +42,7 @@ export async function main(args: string[]): Promise<void> {
   }
 
   const starterDir = path.join(STARTERS_ROOT, prototype);
-  if (!isDirectory(starterDir)) {
+  if (!isStarterDirectory(starterDir)) {
     console.error(`\nError: unknown prototype "${prototype}".\n`);
     console.error(`Available prototypes: ${listAvailablePrototypes().join(", ")}\n`);
     process.exit(1);
@@ -87,10 +87,22 @@ function isDirectory(p: string): boolean {
   }
 }
 
+/**
+ * A starter is a directory with its own package.yaml — not just any
+ * directory under starters/. Found live: a concurrently-running test
+ * suite (tests/starters.golden.test.js) builds into starters/dist/
+ * before cleaning it up; without this check that transient directory
+ * (or anything else stray) briefly listed itself as an "available
+ * prototype" and would have been silently copied as one if requested.
+ */
+function isStarterDirectory(p: string): boolean {
+  return isDirectory(p) && fs.existsSync(path.join(p, "package.yaml"));
+}
+
 function listAvailablePrototypes(): string[] {
   if (!isDirectory(STARTERS_ROOT)) return [];
   return fs.readdirSync(STARTERS_ROOT, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
+    .filter((e) => e.isDirectory() && isStarterDirectory(path.join(STARTERS_ROOT, e.name)))
     .map((e) => e.name)
     .sort();
 }

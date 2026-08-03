@@ -30,14 +30,18 @@ Five files, each with one job, wired together in this order:
    `heps check` time, not just a convention.
 4. **`themes/default/tokens.json`** + **`themes/default/overrides.css`** —
    design tokens and a small, scoped CSS override the template's `theme:
-   default` points at. `tokens.json` here only shows `color` — this
-   starter demonstrating a minimal working set, not a restricted one:
-   `tokens.json` uses an open token namespace. Every dot-separated path
-   is emitted as a scoped CSS custom property, for example
-   `color.brand.primary` becomes `--color-brand-primary`. HEPS does not
-   currently enforce a fixed token vocabulary; whether a token changes a
-   visible component depends on whether the target HUB's styles consume
-   that variable.
+   default` points at. `tokens.json` uses an open token namespace: every
+   dot-separated path is emitted as a scoped CSS custom property, e.g.
+   `color.primary` becomes `--color-primary`. HEPS enforces no fixed
+   token vocabulary — whether a token changes anything visible depends
+   on whether the target HUB's own styles happen to read that variable
+   name. The seven names this starter actually uses (`color.primary`,
+   `color.primary-contrast`, `color.surface`, `color.surface-muted`,
+   `color.text`, `color.text-muted`, `color.border`) were checked
+   against one reference HUB's theme CSS and confirmed consumed there —
+   they are a *demonstrated-working example*, not a guarantee for every
+   HUB. See "Stable CSS hooks" below for what `overrides.css` is allowed
+   to target.
 5. **`assets/`** — package-owned files, referenced from composition fields
    as `asset://<path>`. Unused in this starter (the intro slot is
    text-only) but part of the canonical contract regardless.
@@ -89,3 +93,28 @@ CLI or this starter can check. Module availability has to be confirmed
 by whoever operates that HUB before you install there. A public
 module/field contract you could check yourself, without asking anyone,
 is planned but doesn't exist yet.
+
+## Stable CSS hooks
+
+`overrides.css` here targets exactly six selectors — the only ones this
+starter commits to. Everything else in the rendered markup (every other
+class you'd see in a browser's inspector) is internal implementation and
+can change without notice:
+
+| Selector | What it is | Why it's stable |
+|---|---|---|
+| `.category-promo-banner__title` | this starter's own intro title | `category-promo-banner`'s manifest declares it as a public `theme.elements` hook — checked by the HUB's own governance tests, not just convention |
+| `.category-product-nav` | the filter/product-count bar | Outlet-rendered (HUB Runtime, not a module) — committed via a HUB-side regression test |
+| `.category-product-listing-grid` | the product grid's outer section | same as above |
+| `.product-teaser-card` | one product card, root | same as above |
+| `.product-teaser-card__image` | the product image inside a card | same as above |
+| `.product-teaser-card__price` | the price inside a card | same as above |
+
+The first is governed the same way every Composition-authored module is
+(HEPS's own Layout/Composition contract). The other five aren't modules —
+they're rendered by the HUB Runtime inside the `productNavigation` and
+`listingContent` Outlets this starter's layout declares — so no HEPS-level
+mechanism reaches them; they're stable only because one specific
+reference HUB has committed to them with its own test. A different HUB
+is not bound by that commitment until it makes the same one. Don't select
+any other class you see rendered — it isn't part of this promise.

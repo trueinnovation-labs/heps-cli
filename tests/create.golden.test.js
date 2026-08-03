@@ -105,6 +105,30 @@ test("unknown -p value lists the available prototypes and creates nothing", () =
   assert.ok(!fs.existsSync(path.join(cwd, "my-design")), "nothing should be created for an unknown prototype");
 });
 
+test("a stray non-starter directory under starters/ is never listed or usable as a prototype", () => {
+  // Found live: tests/starters.golden.test.js builds into starters/dist/
+  // and cleans it up in test.afterEach — but while it exists mid-run, a
+  // concurrently-running `heps create` with an unknown -p value listed
+  // "dist" alongside the real starters. Any directory without its own
+  // package.yaml (a stray build artifact, an editor swap dir, anything)
+  // must never be treated as a starter.
+  const strayDir = path.join(__dirname, "..", "starters", "not-a-real-starter");
+  fs.mkdirSync(strayDir, { recursive: true });
+  fs.writeFileSync(path.join(strayDir, "some-file.txt"), "not a package.yaml");
+
+  try {
+    const { stderr } = runCliExpectError(["create", "my-design", "-p", "does-not-exist"], tmpCwd());
+    assert.ok(!stderr.includes("not-a-real-starter"), "a directory with no package.yaml must not be listed as an available prototype");
+
+    const cwd = tmpCwd();
+    const usingStray = runCliExpectError(["create", "my-design", "-p", "not-a-real-starter"], cwd);
+    assert.match(usingStray.stderr, /unknown prototype/i);
+    assert.ok(!fs.existsSync(path.join(cwd, "my-design")), "must not silently scaffold from a directory with no package.yaml");
+  } finally {
+    fs.rmSync(strayDir, { recursive: true, force: true });
+  }
+});
+
 test("an existing target directory is never overwritten, regardless of prototype", () => {
   const cwd = tmpCwd();
   runCli(["create", "my-design", "-p", "minimal"], cwd);
