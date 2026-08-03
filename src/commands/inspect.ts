@@ -32,7 +32,16 @@ export async function main(args: string[]): Promise<void> {
     return;
   }
 
-  const dirArg = args.find((a) => !a.startsWith("--"));
+  // Exclude --capabilities and its value from directory detection — otherwise
+  // "heps inspect --capabilities caps.json my-design" (flag before the dir)
+  // would mistake the flag's own value for the package directory.
+  const consumedIndices = new Set<number>();
+  const capabilitiesFlagIdx = args.indexOf("--capabilities");
+  if (capabilitiesFlagIdx !== -1) {
+    consumedIndices.add(capabilitiesFlagIdx);
+    consumedIndices.add(capabilitiesFlagIdx + 1);
+  }
+  const dirArg = args.find((a, i) => !consumedIndices.has(i) && !a.startsWith("--"));
   const dir = path.resolve(dirArg ?? process.cwd());
 
   if (!fs.existsSync(dir)) {
@@ -54,12 +63,34 @@ export async function main(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  printReport(pkg);
+  const capabilitiesPath = readFlag(args, "--capabilities");
+  let capabilities: ModuleCapabilityCatalog | undefined;
+  let capabilitiesError: string | undefined;
+  if (capabilitiesPath != null) {
+    const result = loadModuleCapabilities(path.resolve(capabilitiesPath));
+    if ("error" in result) {
+      capabilitiesError = result.error;
+    } else {
+      capabilities = result;
+    }
+  }
+
+  printReport(pkg, capabilities, capabilitiesError);
+}
+
+function readFlag(args: string[], flag: string): string | undefined {
+  const idx = args.indexOf(flag);
+  if (idx === -1) return undefined;
+  return args[idx + 1];
 }
 
 // ── Report ────────────────────────────────────────────────────────────────────
 
-function printReport(pkg: LoadedHepsPackageV2): void {
+function printReport(
+  pkg: LoadedHepsPackageV2,
+  capabilities: ModuleCapabilityCatalog | undefined,
+  capabilitiesError: string | undefined,
+): void {
   const registry = loadDesignSurfaceRegistry(CATEGORY_LISTING_REGISTRY_PATH);
   const lines: string[] = [];
 
@@ -116,6 +147,51 @@ function printReport(pkg: LoadedHepsPackageV2): void {
 
   const warningLines: string[] = [];
 
+  if (capabilities) {
+    const usedByModuleKind = new Map<string, string[]>();
+    for (const comp of pkg.compositions) {
+      for (const slot of comp.slots) {
+        const list = usedByModuleKind.get(slot.moduleKind) ?? [];
+        list.push(slot.id);
+        usedByModuleKind.set(slot.moduleKind, list);
+      }
+    }
+
+    const knownModuleKinds = [...usedByModuleKind.keys()].filter((k) => capabilities.modules[k]);
+    if (knownModuleKinds.length > 0) {
+      lines.push("Modules");
+      lines.push("");
+      for (const moduleKind of knownModuleKinds) {
+        const module = capabilities.modules[moduleKind]!;
+        const fieldNames = Object.keys(module.fields);
+        const required = fieldNames.filter((f) => module.fields[f]!.required);
+        const optional = fieldNames.filter((f) => !module.fields[f]!.required);
+
+        lines.push(`  ${moduleKind}`);
+        lines.push("");
+        lines.push("  Required fields");
+        for (const f of required) lines.push(`    ${f}`);
+        if (required.length === 0) lines.push("    (none)");
+        lines.push("");
+        lines.push("  Optional fields");
+        for (const f of optional) lines.push(`    ${f}`);
+        if (optional.length === 0) lines.push("    (none)");
+        lines.push("");
+        lines.push("  Used by");
+        for (const slotId of usedByModuleKind.get(moduleKind)!) lines.push(`    ${slotId}`);
+        lines.push("");
+      }
+    }
+
+    for (const comp of pkg.compositions) {
+      for (const slot of comp.slots) {
+        const module = capabilities.modules[slot.moduleKind];
+        if (!module) continue;
+        warningLines.push(...buildModuleFieldWarnings(slot.moduleKind, slot.fields, module));
+      }
+    }
+  }
+
   for (const theme of pkg.themes) {
     const tokenPairs = flattenTokens(theme.tokens);
     const selectors = extractSelectors(theme.overridesCss ?? "");
@@ -149,6 +225,9 @@ function printReport(pkg: LoadedHepsPackageV2): void {
   warningLines.push(...buildAssetWarnings(pkg));
   if (registry.error) {
     warningLines.push(`  DESIGN_SURFACE_REGISTRY_UNAVAILABLE  ${registry.error}`);
+  }
+  if (capabilitiesError) {
+    warningLines.push(`  MODULE_CAPABILITY_CATALOG_UNAVAILABLE  ${capabilitiesError}`);
   }
 
   console.log(lines.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd());
@@ -302,13 +381,114 @@ function buildUndocumentedSelectorWarnings(selectors: string[], registry: Design
     .map((selector) => `  UNDOCUMENTED_DESIGN_SELECTOR  Selector "${selector}" is not part of the current category-listing design surface registry.`);
 }
 
+// ── Module Capability Catalog (optional, HUB-owned, never bundled) ──────────
+//
+// The HUB owns which modules exist and what fields they accept — this file
+// only reads a catalog the caller explicitly points it at with
+// --capabilities. No auto-discovery, no default catalog shipped with this
+// CLI. See docs/contracts/module-capabilities/README.md.
+
+export type ModuleCapabilityField = { type: string; required?: boolean; values?: readonly string[] };
+export type ModuleCapabilityCatalog = {
+  version: string;
+  modules: Record<string, {
+    surfaces?: readonly string[];
+    allowedSlots?: readonly string[];
+    fields: Record<string, ModuleCapabilityField>;
+  }>;
+};
+
+/** Exported so tests can point this at a bogus path directly (see loadDesignSurfaceRegistry). */
+export function loadModuleCapabilities(catalogPath: string): ModuleCapabilityCatalog | { error: string } {
+  if (!fs.existsSync(catalogPath)) {
+    return { error: `Module capability catalog not found: ${catalogPath}` };
+  }
+  try {
+    return JSON.parse(fs.readFileSync(catalogPath, "utf8")) as ModuleCapabilityCatalog;
+  } catch (err) {
+    return { error: `Module capability catalog could not be read: ${errorMessage(err)}` };
+  }
+}
+
+/** Every leaf dot-path in a composition slot's `fields:` value — same convention as a module manifest's own `editor.fields` names (e.g. "cta.label" for a nested `cta: { label }`). */
+function flattenFieldPaths(fields: unknown, prefix = ""): string[] {
+  if (fields == null || typeof fields !== "object" || Array.isArray(fields)) {
+    return prefix ? [prefix] : [];
+  }
+  const paths: string[] = [];
+  for (const [key, value] of Object.entries(fields as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (value != null && typeof value === "object" && !Array.isArray(value)) {
+      paths.push(...flattenFieldPaths(value, path));
+    } else {
+      paths.push(path);
+    }
+  }
+  return paths;
+}
+
+function levenshtein(a: string, b: string): number {
+  const dp: number[][] = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) dp[i]![0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0]![j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i]![j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1]![j - 1]!
+        : 1 + Math.min(dp[i - 1]![j]!, dp[i]![j - 1]!, dp[i - 1]![j - 1]!);
+    }
+  }
+  return dp[a.length]![b.length]!;
+}
+
+function nearestFieldName(unknownField: string, knownFields: readonly string[]): string | undefined {
+  let best: string | undefined;
+  let bestDistance = Infinity;
+  for (const known of knownFields) {
+    const distance = levenshtein(unknownField, known);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = known;
+    }
+  }
+  // Only suggest a genuinely close match — otherwise "did you mean" on a
+  // field that shares nothing with the typo is noise, not help.
+  return bestDistance <= 3 ? best : undefined;
+}
+
+function buildModuleFieldWarnings(
+  moduleKind: string,
+  slotFields: Record<string, unknown> | undefined,
+  module: ModuleCapabilityCatalog["modules"][string],
+): string[] {
+  const warnings: string[] = [];
+  const knownFieldNames = Object.keys(module.fields);
+  const actualFieldPaths = flattenFieldPaths(slotFields);
+
+  for (const [fieldName, def] of Object.entries(module.fields)) {
+    if (def.required && !actualFieldPaths.includes(fieldName)) {
+      warnings.push(`  MISSING_REQUIRED_MODULE_FIELD  ${moduleKind} requires "${fieldName}".`);
+    }
+  }
+
+  for (const actual of actualFieldPaths) {
+    if (!knownFieldNames.includes(actual)) {
+      const suggestion = nearestFieldName(actual, knownFieldNames);
+      const suffix = suggestion ? ` Did you mean "${suggestion}"?` : "";
+      warnings.push(`  UNKNOWN_MODULE_FIELD  Field "${actual}" is not defined for ${moduleKind}.${suffix}`);
+    }
+  }
+
+  return warnings;
+}
+
 function stem(filePath: string): string {
   return filePath.replace(/\.ya?ml$/, "");
 }
 
 function printHelp(): void {
   console.log(`
-heps inspect [dir]
+heps inspect [dir] [--capabilities <file>]
 
 Read-only design overview of a HEPS v2 package: Template -> Layout ->
 Composition -> Theme bindings, Slots, Outlets, module kinds, tokens,
@@ -316,23 +496,32 @@ their generated CSS variables, the CSS selectors actually used, and
 assets.
 
 Arguments:
-  dir   Package directory. Default: current directory
+  dir                    Package directory. Default: current directory
+  --capabilities <file>  Optional Module Capability Catalog (see
+                         docs/contracts/module-capabilities/) — a HUB-owned
+                         file describing which moduleKinds exist and what
+                         fields each accepts. Without it, no "Modules"
+                         section and no MISSING_REQUIRED_MODULE_FIELD /
+                         UNKNOWN_MODULE_FIELD warnings.
 
 Advisory warnings only — never blocking, never a nonzero exit code on
 their own, never rejecting a token or CSS selector as categorically
 "unknown" (HEPS's token namespace is open by design, see
 docs/design-contract.md):
 
-  UNUSED_LOCAL_TOKEN          a token is defined but this theme's own
-                              overrides.css never references it
-  UNDEFINED_TOKEN_REFERENCE   overrides.css references a CSS variable
-                              no token in tokens.json actually produces
-  UNREFERENCED_ASSET          a file under assets/ no composition field
-                              references
-  UNDOCUMENTED_DESIGN_SELECTOR  overrides.css uses a selector that
-                              isn't part of the (currently
-                              category-listing-only) Design Surface
-                              Registry — docs/contracts/design-surfaces/
+  UNUSED_LOCAL_TOKEN            a token is defined but this theme's own
+                                overrides.css never references it
+  UNDEFINED_TOKEN_REFERENCE     overrides.css references a CSS variable
+                                no token in tokens.json actually produces
+  UNREFERENCED_ASSET            a file under assets/ no composition field
+                                references
+  UNDOCUMENTED_DESIGN_SELECTOR  overrides.css uses a selector that isn't
+                                part of the (currently category-listing-
+                                only) Design Surface Registry
+  MISSING_REQUIRED_MODULE_FIELD  (needs --capabilities) a composition
+                                slot omits a field its module requires
+  UNKNOWN_MODULE_FIELD          (needs --capabilities) a composition
+                                slot sets a field its module doesn't define
 
 This never validates the package (see "heps check" for that) and never
 contacts a HUB.

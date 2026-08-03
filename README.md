@@ -131,6 +131,19 @@ Four advisory warnings, never blocking — HEPS's token namespace is open by des
 - `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
 - `UNDOCUMENTED_DESIGN_SELECTOR` — `overrides.css` uses a selector that isn't part of the [Design Surface Registry](./docs/contracts/design-surfaces/) (today: `category-listing` only — a package targeting a different surface won't be checked against it).
 
+#### `--capabilities <file>` — Module/Field Discovery
+
+The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Module Capability Catalog](./docs/contracts/module-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
+
+```bash
+heps inspect summer-sale --capabilities heps-capabilities.json
+```
+
+- `MISSING_REQUIRED_MODULE_FIELD` — a composition slot omits a field its module requires.
+- `UNKNOWN_MODULE_FIELD` — a composition slot sets a field its module doesn't define, with a "did you mean" suggestion for a close typo.
+
+Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, no module-field warnings.
+
 ---
 
 ## What HEPS guarantees
@@ -145,6 +158,11 @@ a stable semantic name (`listing.card.price`) for each already-committed
 CSS selector, so the name an agency learns can outlive the implementation
 class behind it. Only lists what's already real and tested — see that
 folder's own README for the rule.
+
+[`docs/contracts/module-capabilities/`](./docs/contracts/module-capabilities/) —
+the format `heps inspect --capabilities` reads: which `moduleKind`s a HUB
+has registered and what fields each one accepts. The HUB owns this data;
+this CLI only reads a file you point it at.
 
 ## Full documentation
 

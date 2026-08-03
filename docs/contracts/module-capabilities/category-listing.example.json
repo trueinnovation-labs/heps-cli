@@ -1,0 +1,32 @@
+{
+  "version": "1",
+  "modules": {
+    "category-promo-banner": {
+      "surfaces": ["category"],
+      "allowedSlots": [
+        "category.promo-banner",
+        "category.hero",
+        "category.editorial-feature",
+        "category.editorial-rain",
+        "category.editorial-waterproof",
+        "women.hero",
+        "women.featured",
+        "women.story-feature",
+        "women.story-secondary",
+        "women.story-tertiary",
+        "women.closing"
+      ],
+      "fields": {
+        "eyebrow": { "type": "string", "required": false },
+        "title": { "type": "string", "required": true },
+        "description": { "type": "string", "required": true },
+        "imageUrl": { "type": "string", "required": false },
+        "presentation": { "type": "string", "required": false, "values": ["overlay", "split"] },
+        "cta.label": { "type": "string", "required": false },
+        "cta.href": { "type": "string", "required": false },
+        "media": { "type": "object", "required": false },
+        "priority": { "type": "boolean", "required": false }
+      }
+    }
+  }
+}
