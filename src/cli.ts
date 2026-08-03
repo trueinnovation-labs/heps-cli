@@ -1,6 +1,6 @@
 import process from "node:process";
 
-const COMMANDS = ["create", "check", "build"] as const;
+const COMMANDS = ["create", "check", "build", "inspect"] as const;
 type Command = (typeof COMMANDS)[number];
 
 export async function dispatch(argv: string[]): Promise<void> {
@@ -26,9 +26,10 @@ function printHelp(): void {
 heps <command> [options]
 
 Commands:
-  create <name>   Scaffold a new HEPS v2 design package
-  check  [dir]    Validate a HEPS v2 package  (READY / BLOCKED, exit 0 / 1)
-  build  [dir]    Package validated source for distribution
+  create  <name>  Scaffold a new HEPS v2 design package
+  check   [dir]   Validate a HEPS v2 package  (READY / BLOCKED, exit 0 / 1)
+  build   [dir]   Package validated source for distribution
+  inspect [dir]   Read-only design overview: bindings, tokens, CSS, assets
 
 Run "heps <command> --help" for command-specific options.
 `);

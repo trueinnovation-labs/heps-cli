@@ -116,6 +116,19 @@ Output always lands at `<package-parent-directory>/dist/<package-id>-<version>/`
 
 Building the same package twice replaces the previous output cleanly; a failed build never touches a prior good one.
 
+### `heps inspect [dir]`
+
+Read-only design overview — no validation (see `heps check` for that), no HUB contact, no new rules. Answers "what did I actually build?": the Template → Layout → Composition → Theme bindings, every Slot and Outlet, which `moduleKind` fills each slot, every token's generated CSS variable, the CSS selectors your `overrides.css` actually uses, and your assets.
+
+```bash
+heps inspect summer-sale
+```
+
+Two advisory warnings, never blocking — HEPS's token namespace is open by design (see [`docs/design-contract.md`](./docs/design-contract.md)), so this never rejects a token or selector as "unknown":
+
+- `UNUSED_LOCAL_TOKEN` — a token is defined in `tokens.json` but this theme's own `overrides.css` never references its generated CSS variable.
+- `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
+
 ---
 
 ## What HEPS guarantees
