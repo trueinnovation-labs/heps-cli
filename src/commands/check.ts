@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { readHepsPackageV2, validateHepsPackageV2 } from "@hub/heps-core";
+import { readHepsPackageV2, validateHepsPackageV2 } from "../sdk/index.js";
 import { printGroupedIssues, errorMessage } from "../lib/printValidationIssues.js";
 
 export async function main(args: string[]): Promise<void> {
@@ -61,8 +61,9 @@ function printHelp(): void {
   console.log(`
 heps check [dir]
 
-Validates a HEPS v2 package using @hub/heps-core (readHepsPackageV2 +
-validateHepsPackageV2 — no additional CLI-side rules).
+Validates a HEPS v2 package using this CLI's own bundled HEPS SDK
+(src/sdk/ — readHepsPackageV2 + validateHepsPackageV2, no additional
+CLI-side rules).
 
 Arguments:
   dir   Package directory. Default: current directory
@@ -72,7 +73,10 @@ Exit codes:
   1  BLOCKED — validation errors found
 
 Note: this only proves the package is a well-formed HEPS v2 package.
-It does not check whether module kinds are registered in a specific
-HUB — that check happens again, with HUB context, at install time.
+Without HUB context (which this CLI never has), it cannot check
+whether a moduleKind is registered, whether an Outlet name is really
+provided by a target HUB's Surface Outlet Registry, or whether a
+provider: hub layout name matches a real built-in HUB layout — those
+checks happen again, with HUB context, at install time.
 `);
 }

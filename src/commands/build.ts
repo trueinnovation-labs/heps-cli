@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
-import { readHepsPackageV2, validateHepsPackageV2, HEPS_V2_PACKAGE_ENTRIES } from "@hub/heps-core";
-import type { LoadedHepsPackageV2, HepsValidationIssue } from "@hub/heps-core";
+import { readHepsPackageV2, validateHepsPackageV2, HEPS_V2_PACKAGE_ENTRIES } from "../sdk/index.js";
+import type { LoadedHepsPackageV2, HepsValidationIssue } from "../sdk/index.js";
 import { printGroupedIssues, errorMessage } from "../lib/printValidationIssues.js";
 
 // The only HEPS v2 package structures ever copied into a build output.

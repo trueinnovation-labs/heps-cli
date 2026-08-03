@@ -1,4 +1,4 @@
-import type { HepsValidationIssue } from "@hub/heps-core";
+import type { HepsValidationIssue } from "../sdk/index.js";
 
 /** Groups issues by file path (sorted), then by code within each path. Shared by heps check and heps build. */
 export function printGroupedIssues(issues: readonly HepsValidationIssue[]): void {

@@ -21,10 +21,11 @@
   "engines": { "node": ">=18" },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
-    "@hub/heps-core": "file:../magento-next-hub/packages/heps-core",
+    "js-yaml": "^4.1.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0"
   }

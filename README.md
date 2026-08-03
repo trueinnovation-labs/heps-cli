@@ -20,30 +20,16 @@ If you're looking for how to install a built package into a HUB, or what a valid
 
 ## Install
 
-Not published to a registry yet — build from source.
-
-**Prerequisite:** `@hub/heps-core` is not published either — it's linked as a local `file:` dependency, so the HUB repository must be cloned as a **sibling directory** named exactly `magento-next-hub`:
+Not published to a registry yet — build from source. No other repository
+needed: this CLI ships its own portable HEPS SDK (`src/sdk/` — see "What
+HEPS guarantees" below), not a dependency on any HUB checkout.
 
 ```bash
-git clone git@github.com:trueinnovation-labs/edge-delivery-commerce-hub.git magento-next-hub
-git clone git@github.com:trueinnovation-labs/heps-cli.git
-
-# both directories side by side:
-#   ./magento-next-hub/
-#   ./heps-cli/
-
-# @hub/heps-core ships no committed dist/ — build it before it can be resolved
-cd magento-next-hub/packages/heps-core
-npm install
-npm run build
-cd ../../..
-
+git clone https://github.com/trueinnovation-labs/heps-cli.git
 cd heps-cli
 npm install
 npm run build
 ```
-
-`npm install`/`tsc` in `heps-cli` will fail to resolve `@hub/heps-core` if you skip building it first.
 
 Then either run it directly:
 
@@ -92,7 +78,7 @@ Refuses to touch an existing directory — no merge, no overwrite, no `--force`.
 
 ### `heps check [dir]`
 
-Validates a package's structure and contract — file references resolve, IDs are well-formed, CSS is safe. Defaults to the current directory. No HUB context: this can never check whether a `moduleKind` is registered on any particular HUB, or whether a `requires.hub` version constraint is satisfiable — those are checked by the HUB itself at install time, deliberately.
+Validates a package's structure and contract — file references resolve, IDs are well-formed, CSS is safe. Defaults to the current directory. No HUB context: this can never check whether a `moduleKind` is registered on any particular HUB, whether an Outlet name is really provided by a target HUB's Surface Outlet Registry, whether a `provider: hub` layout name matches a real built-in HUB layout, or whether a `requires.hub` version constraint is satisfiable — those are checked by the HUB itself at install time, deliberately.
 
 ```bash
 heps check summer-sale
@@ -136,8 +122,8 @@ Building the same package twice replaces the previous output cleanly; a failed b
 
 [`docs/design-contract.md`](./docs/design-contract.md) — what belongs to
 you, what belongs to the HUB, what `heps check` actually enforces vs.
-what's convention, grounded in `@hub/heps-core`'s own exports so it can
-never drift further from the code than this document lets it.
+what's convention, grounded in this CLI's own `src/sdk/` exports so it
+can never drift further from the code than this document lets it.
 
 ## Full documentation
 

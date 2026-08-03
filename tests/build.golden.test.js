@@ -2,12 +2,12 @@
 //
 // Law: what `heps check` accepts as valid package content, `heps build`
 // must never lose. The regression this file exists to catch: `heps
-// build` used to hardcode its own copy whitelist, separate from
-// @hub/heps-core's readHepsPackageV2 — the two lists agreed the day
-// both were written and silently diverged the day the Layout Contract
-// added layouts/ to the read/validate side without anyone updating the
-// build side. A `heps check`-clean package (this golden fixture) would
-// build successfully while silently losing its layouts/ directory.
+// build` used to hardcode its own copy whitelist, separate from the
+// SDK's readHepsPackageV2 — the two lists agreed the day both were
+// written and silently diverged the day the Layout Contract added
+// layouts/ to the read/validate side without anyone updating the build
+// side. A `heps check`-clean package (this golden fixture) would build
+// successfully while silently losing its layouts/ directory.
 //
 // No test framework dependency — Node's built-in test runner (stable
 // since Node 18, matching this CLI's own engines requirement), invoking
@@ -20,7 +20,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { HEPS_V2_PACKAGE_ENTRIES } from "@hub/heps-core";
+import { HEPS_V2_PACKAGE_ENTRIES } from "../dist/sdk/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(__dirname, "..", "bin", "heps.js");

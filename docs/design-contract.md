@@ -44,19 +44,22 @@ who has three "Guaranteed" bullets undocumented.
 
 ## Where this comes from
 
-Every "Guaranteed" claim below names the export in `@hub/heps-core` that
-actually enforces it. `@hub/heps-core` is a real dependency of this CLI —
-if you've run `npm install` here, it's already in your `node_modules`,
-and you can `import { X } from "@hub/heps-core"` and read the same thing
-this document names. Nothing below is grounded in a file you can't reach.
+Every "Guaranteed" claim below names the export in this CLI's own
+`src/sdk/` that actually enforces it — no external dependency, no
+`node_modules` resolution required: clone this repo and the file is
+right there. (`src/sdk/` is a vendored copy of the HUB's internal
+`@hub/heps-core`, minus the two exports — `KNOWN_HUB_LAYOUTS`,
+`SURFACE_OUTLET_REGISTRY` — that turned out to be facts about one
+specific HUB runtime, not about the HEPS format itself; see the
+Template and Layout chapters below for what that means in practice.)
 
 This is deliberate, not decoration: a contract that drifts from the code
 enforcing it is worse than no contract, because it's trusted. (This
-audit found exactly that drift once already — `@hub/heps-core`'s own
-internal header comment still describes a five-directory layout that
-predates the `layouts/` directory it validates today. Fixing that
-comment is out of scope for this PR; not repeating the mistake here is
-the point.)
+audit found exactly that drift once already — the source `types.ts`
+header comment this file was vendored from still describes a
+five-directory layout that predates the `layouts/` directory it
+validates today. Fixing that comment is out of scope for this PR; not
+repeating the mistake here is the point.)
 
 ---
 
@@ -114,10 +117,10 @@ Theme, which Composition(s).
 - Every Slot the paired Layout declares must exist as a slot `id` in the
   paired Composition — the binding is enforced, not a naming convention.
   Source: `SLOT_NOT_IN_COMPOSITION`
-- `layout.provider: "hub"` is the only provider `heps check` treats as a
-  hard requirement — either a name from a small, fixed set of built-in
-  HUB layouts, or a Layout Definition this package ships itself.
-  Source: `KNOWN_HUB_LAYOUTS`, `HepsLayoutReference` (type)
+- `layout.provider` is checked for shape: `"hub"` or a package-owned
+  Layout Definition is the only combination this CLI's local `heps check`
+  can confirm at all (see "Not guaranteed" below for what it can't).
+  Source: `HepsLayoutReference` (type)
 
 **Flexible:**
 
@@ -134,6 +137,14 @@ Theme, which Composition(s).
   only as a **warning**, not an error. That means it's syntactically
   possible, not a supported production path today.
   Source: `UNKNOWN_LAYOUT` (warning branch)
+- Whether a `provider: "hub"` layout name that *isn't* a Layout
+  Definition in this package matches one of a target HUB's real
+  built-in layouts. Which names those are is a fact about that HUB, not
+  the format — this CLI's local `heps check` has no such list to check
+  against (a bare `ValidationContext` supplies none), so it neither
+  confirms nor rejects the name. Checked for real, with HUB context, at
+  install time.
+  Source: `ValidationContext.knownHubLayouts`
 
 **Example:** [`starters/commerce-category-listing/templates/category-listing.yaml`](../starters/commerce-category-listing/templates/category-listing.yaml)
 
@@ -161,9 +172,11 @@ hand-authors.
   across the whole Layout Definition and can't collide with any
   slot/outlet name.
   Source: `DUPLICATE_CHILD_NAME`, `DUPLICATE_REGION_ID`
-- Every `outlet` name must be one the target Surface actually provides —
-  checked against a fixed registry, not left to convention.
-  Source: `SURFACE_OUTLET_REGISTRY`, `OUTLET_NOT_AVAILABLE_FOR_SURFACE`
+- Every `outlet` name is well-formed and uniquely named as a leaf node —
+  this CLI's local `heps check` stops there (see "Not guaranteed" below
+  for the part it can't confirm).
+  Source: `OUTLET_NOT_AVAILABLE_FOR_SURFACE` (the check's *shape*; it
+  only fires when a Surface Outlet Registry is supplied)
 
 **Flexible:**
 
@@ -177,13 +190,16 @@ hand-authors.
 
 **Not guaranteed:**
 
-- The Surface Outlet Registry's contents. Today it has exactly one
-  entry: `category → [listingContent, productNavigation]`. A package
-  cannot invent its own outlet name and expect the HUB to fill it —
-  which outlets exist per Surface is entirely HUB-owned, and today the
-  only place to look it up is this registry's export, not a public
-  per-surface catalog.
-  Source: `SURFACE_OUTLET_REGISTRY`
+- Whether the Outlet names you use are ones a real target HUB actually
+  provides. Today, one HUB's registry has exactly one entry:
+  `category → [listingContent, productNavigation]` — but which outlets
+  exist per Surface is entirely HUB-owned, not part of this format, and
+  this CLI's local `heps check` has no such registry to check against
+  (a bare `ValidationContext` supplies none), so a made-up outlet name
+  passes locally and only fails later, with real HUB context, at
+  install time. There is no public, per-surface catalog to look this up
+  against yourself yet.
+  Source: `ValidationContext.surfaceOutletRegistry`
 
 **Example:** [`starters/commerce-category-listing/layouts/category/agency-listing.yaml`](../starters/commerce-category-listing/layouts/category/agency-listing.yaml)
 
@@ -306,8 +322,8 @@ unused in this starter — the one slot it fills is text-only).
 | Chapter | You own | HUB owns | Biggest "not guaranteed" |
 |---|---|---|---|
 | Package | everything | — | `apiVersion` format itself (alpha) |
-| Template | the binding | — | non-`hub` layout providers |
-| Layout | Slot/Region structure | Outlet content | Surface Outlet Registry contents |
+| Template | the binding | — | non-`hub` providers, and whether a `hub` layout name is real on the target HUB |
+| Layout | Slot/Region structure | Outlet content | whether an Outlet name is real on the target HUB |
 | Composition | slot content | module registration | `moduleKind`/field availability on target HUB |
 | Theme | tokens + CSS | which CSS vars get consumed | stable CSS hooks (don't exist yet) |
 | Assets | everything | — | (none) |
