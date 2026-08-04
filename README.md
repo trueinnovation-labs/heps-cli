@@ -56,8 +56,10 @@ heps create my-brand
 
 ## The Golden Flow
 
-The full loop this CLI supports, start to finish, against the Golden
-Starter:
+Want the guided, step-by-step version — change the colors, the intro
+banner, and the CSS, not just run the commands — see
+[`docs/designer-guide.md`](./docs/designer-guide.md), "Create Your First
+Commerce Design." What follows here is the same loop, compressed:
 
 ```bash
 heps create summer-sale -p commerce-category-listing
