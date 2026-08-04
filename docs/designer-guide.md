@@ -193,3 +193,105 @@ full rules instead of the guided version:
 [CSS Hooks](./contracts/css-hooks.md),
 [Design Surfaces](./contracts/design-surfaces/),
 [Module Capabilities](./contracts/module-capabilities/).
+
+## Going Further — a second Slot in your Layout
+
+Everything above uses the Golden Starter's one Slot, `category.intro`.
+The [Layout Contract's "Guaranteed" section](./contracts/layout-contract.md#guaranteed)
+puts no cap on how many Slots a package-owned Layout declares, or on
+where in the region tree they sit — this walks through actually adding
+a second one, so that's a built and checked example, not just a claim.
+It's the same construction [`tests/capabilities.golden.test.js`](../tests/capabilities.golden.test.js)
+runs on every `npm test` — the guide and the standing test prove the
+same thing, not two different things.
+
+### 1. Add a region for it
+
+Open `layouts/category/agency-listing.yaml`. Add a new region anywhere
+in `root.children` — here, right after the intro region:
+
+```yaml
+root:
+  arrangement: stack
+  children:
+    - region:
+        id: category.intro-section
+        arrangement: stack
+        children:
+          - slot: category.intro
+    - region:
+        id: category.editorial-section
+        arrangement: stack
+        children:
+          - slot: category.editorial
+    - region:
+        id: category.navigation-section
+        arrangement: stack
+        children:
+          - outlet: productNavigation
+    - region:
+        id: category.listing-section
+        arrangement: stack
+        children:
+          - outlet: listingContent
+```
+
+### 2. Declare the new Slot
+
+Same file, in the `regions:` block at the bottom — every Slot
+referenced above needs an entry here:
+
+```yaml
+regions:
+  category.intro: { label: "Category Intro" }
+  category.editorial: { label: "Editorial" }
+```
+
+### 3. Bind it to a module
+
+Open `compositions/category/default.yaml` (or your renamed,
+`entityKey`'d file from Step 5) and add a second slot entry. This
+reuses `category-promo-banner` because it's the one module this
+starter already ships and demonstrates — any module actually
+registered on your target HUB works the same way:
+
+```yaml
+slots:
+  - id: category.intro
+    moduleKind: category-promo-banner
+    fields:
+      eyebrow: "Category"
+      title: "Commerce Category Listing Starter"
+      description: "Tell your customers what makes this category worth shopping. The product grid below is rendered live from your connected commerce backend."
+      imageUrl: "asset://mark.svg"
+  - id: category.editorial
+    moduleKind: category-promo-banner
+    fields:
+      title: "A second, independent Slot"
+      description: "Built from nothing but this repository's own Layout Contract and Module Capability Catalog."
+```
+
+### 4. Check it
+
+```bash
+heps check .
+heps inspect . --capabilities <capability-catalog-if-your-operator-gave-you-one>
+```
+
+`heps check` reports `READY` — a second Slot isn't a special case.
+`heps inspect`'s `Layout > Slots` section lists both `category.intro`
+and `category.editorial`, and the Warnings section stays empty: a
+second Slot bound to a real module's required fields doesn't trigger
+`MISSING_REQUIRED_MODULE_FIELD` or any of the others.
+
+### What this proves
+
+Nothing here is HUB-specific: the region id, the slot id, and the
+label are all names this package chose, the same way `category.intro`
+was already a name the starter chose. The only fixed part is the
+module (`category-promo-banner`) and its fields, and those come from
+the [Module Capability Catalog](./contracts/module-capabilities/), the
+same public source Step 3 already used. See
+[`docs/capabilities.md`](./capabilities.md)'s "Multiple Slots in one
+Layout" row for how this fits into the bigger picture of what HEPS can
+and can't do today.
