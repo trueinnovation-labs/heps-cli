@@ -17,7 +17,7 @@ cd my-design
 
 You now own a real, installable HEPS v2 package: a package-owned Layout,
 one Composition, one Theme, one Asset. Nothing here is a stripped-down
-demo — it's the same starter [`heps inspect`](./contracts/design-surfaces/)
+demo — it's the same starter that [`heps inspect`](../README.md#heps-inspect-dir)
 reports zero warnings against.
 
 ## Step 2 — Change the colors
