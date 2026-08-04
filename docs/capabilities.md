@@ -50,17 +50,17 @@ Four status levels, not two:
 
 | Capability | Status | Proof | Public Example |
 |---|---|---|---|
-| Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md) | `starters/commerce-category-listing` |
-| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement. Independently reconstructed and validated per the Public Capability Law above (`heps check` → `READY`, zero `heps inspect` warnings) | not shipped in the Golden Starter itself yet — a Designer Guide "Going Further" chapter, not a runtime gap |
-| Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone | none |
-| Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public | none |
-| Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md) | Golden Starter |
-| Design Surface Registry | 🟢 | [`design-surfaces/`](./contracts/design-surfaces/) | Golden Starter |
-| Stable CSS Hooks | 🔵 | [CSS Hook Contract](./contracts/css-hooks.md) — one reference HUB's own commitment, not a format-level contract | Golden Starter (6 selectors) |
-| Module field discovery | 🟢 needs an operator-supplied catalog | [Composition & Module Contract](./contracts/composition-contract.md), [`module-capabilities/`](./contracts/module-capabilities/) | Golden Starter + `category-listing.example.json` |
-| Real, referenced Assets | 🟢 | [`design-contract.md`, Assets chapter](./design-contract.md) | Golden Starter (`mark.svg`) |
-| Editorial intro content (module) | 🟢 | [Composition & Module Contract](./contracts/composition-contract.md) | Golden Starter |
-| Hero / Editorial / Campaign Strip (specific module roles) | 🔵 | Confirmed to exist on one reference HUB's private source — not independently checkable from this repo, and not even the modules' names are published anywhere public yet | none |
+| Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md); `tests/starters.golden.test.js` ("uses a package-owned layout, not one of the HUB's built-in ones") — run on every `npm test` | `starters/commerce-category-listing` |
+| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement; `tests/capabilities.golden.test.js` — a standing, CI-run test, not a one-time check: constructs a second Slot from nothing but this repo's own materials and asserts `heps check` → `READY`, zero `heps inspect` warnings | not shipped in the Golden Starter itself yet — a Designer Guide "Going Further" chapter, not a runtime gap |
+| Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone, no standing test possible here | none |
+| Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public, no standing test possible here | none |
+| Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md); `tests/inspect.golden.test.js` ("Starter Showcase v1: ... reports zero heps inspect warnings") — run on every `npm test` | Golden Starter |
+| Design Surface Registry | 🟢 | [`design-surfaces/`](./contracts/design-surfaces/); `tests/design-surfaces.golden.test.js` (4 tests: parses, unique IDs, non-empty selectors, exactly the current set) — run on every `npm test` | Golden Starter |
+| Stable CSS Hooks | 🔵 | [CSS Hook Contract](./contracts/css-hooks.md) — one reference HUB's own commitment, not a format-level contract; that HUB's own regression test (not this repo's) is the actual enforcement | Golden Starter (6 selectors) |
+| Module field discovery | 🟢 needs an operator-supplied catalog | [Composition & Module Contract](./contracts/composition-contract.md), [`module-capabilities/`](./contracts/module-capabilities/); `tests/inspect.golden.test.js` (`--capabilities` test block) — run on every `npm test` | Golden Starter + `category-listing.example.json` |
+| Real, referenced Assets | 🟢 | [`design-contract.md`, Assets chapter](./design-contract.md); `tests/inspect.golden.test.js` ("mark.svg is a real, referenced asset") — run on every `npm test`, plus a real `heps:install` into a running HUB this session (asset published to `/heps-assets/<packageId>/mark.svg`, confirmed, then cleanly uninstalled) | Golden Starter (`mark.svg`) |
+| Editorial intro content (module) | 🟢 | [Composition & Module Contract](./contracts/composition-contract.md); implied by every Golden Starter test — the entire starter is this capability | Golden Starter |
+| Hero / Editorial / Campaign Strip (specific module roles) | 🔵 | Confirmed to exist on one reference HUB's private source — not independently checkable from this repo, no standing test possible here, and not even the modules' names are published anywhere public yet | none |
 | Recommendations Outlet | ⚪ | The Golden Starter's own layout only ever declares `productNavigation`/`listingContent` — no public source lists any other Outlet name | — |
 | Related Categories Outlet | ⚪ | Same | — |
 
@@ -75,10 +75,18 @@ never "does *this* HUB's admin tool have feature Y."
 ## Reading this alongside the other documents
 
 ```
-Capability Map   →  Can HEPS do X, today?               (this document)
-Public Contracts →  What's guaranteed if it can?         (design-contract.md + contracts/)
-Designer Guide   →  How do I actually build it?          (designer-guide.md)
+Public Contracts →  What's guaranteed?                   (design-contract.md + contracts/)
+Capability Map   →  Can HEPS do X, today?                 (this document)
+Designer Guide   →  How do I actually build it?           (designer-guide.md)
+Golden Tests     →  Does the claim still actually hold?   (tests/*.golden.test.js)
 ```
+
+The fourth layer is what keeps the other three honest over time. A row
+here backed only by a one-time manual check is a snapshot, not a proof
+— it can silently go stale the moment the code it describes changes.
+A row backed by a named `*.golden.test.js` file, run on every `npm
+test`, can't: if the claim stops being true, the suite goes red before
+this document does.
 
 The "Public Example" column is the real roadmap here — not "what
 capability is missing" but **"what capability already exists and has
