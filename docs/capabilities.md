@@ -51,7 +51,7 @@ Four status levels, not two:
 | Capability | Status | Proof | Public Example |
 |---|---|---|---|
 | Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md); `tests/starters.golden.test.js` ("uses a package-owned layout, not one of the HUB's built-in ones") — run on every `npm test` | `starters/commerce-category-listing` |
-| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement; `tests/capabilities.golden.test.js` — a standing, CI-run test, not a one-time check: constructs a second Slot from nothing but this repo's own materials and asserts `heps check` → `READY`, zero `heps inspect` warnings | not shipped in the Golden Starter itself yet — a Designer Guide "Going Further" chapter, not a runtime gap |
+| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement; `tests/capabilities.golden.test.js` — a standing, CI-run test, not a one-time check: constructs a second Slot from nothing but this repo's own materials and asserts `heps check` → `READY`, zero `heps inspect` warnings | [Designer Guide, "Going Further"](./designer-guide.md#going-further--a-second-slot-in-your-layout) — the same construction, written as a tutorial, independently re-verified end to end |
 | Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone, no standing test possible here | none |
 | Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public, no standing test possible here | none |
 | Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md); `tests/inspect.golden.test.js` ("Starter Showcase v1: ... reports zero heps inspect warnings") — run on every `npm test` | Golden Starter |
@@ -90,10 +90,13 @@ this document does.
 
 The "Public Example" column is the real roadmap here — not "what
 capability is missing" but **"what capability already exists and has
-no public example yet."** Multiple Slots and Presentation are both real
-(🟢/🟡, backed by the public Layout Contract and `design-contract.md`)
-and both have no public example — that's a Designer Guide "Going
-Further" chapter waiting to be written, not a new feature waiting to be
-built. A 🔵 or ⚪ row, if an agency genuinely needs it, is what turns
-into a real architecture PR — decided from a demonstrated need, not a
-guess about what might be missing.
+no public example yet."** Multiple Slots went through exactly that
+path: real and 🟢 first, backed only by the Layout Contract and its
+Golden Test, with no public example — closed by writing the Designer
+Guide's "Going Further" chapter, the same construction as a tutorial.
+Presentation is still open the same way (🟡, backed by the public
+Layout Contract and `design-contract.md`, mechanism real, values not
+public) — a "Going Further" chapter waiting to be written, not a new
+feature waiting to be built. A 🔵 or ⚪ row, if an agency genuinely
+needs it, is what turns into a real architecture PR — decided from a
+demonstrated need, not a guess about what might be missing.
