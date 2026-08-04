@@ -3,8 +3,10 @@
 The detailed split-out of [`docs/design-contract.md`](../design-contract.md)'s
 Layout chapter, as that document itself said would happen. Same grounding
 rule applies: every "Guaranteed" claim below names the `src/sdk/` export
-that actually enforces it. If this document and the code ever disagree,
-the code wins — this describes, it doesn't define.
+that actually enforces it. During `heps/v2alpha1`, the SDK implementation
+is the executable source of truth — any disagreement between this
+document and the SDK is a contract defect and must be corrected
+immediately, not treated as an acceptable, ongoing state.
 
 A Layout Definition describes **structure only** — which regions exist,
 how they arrange, which endpoints they expose. It never describes
@@ -123,6 +125,11 @@ it; the two mechanisms never fall back on each other.
   package shipped with this CLI today only happens to use one level; the
   validator itself walks the tree generically, so a genuinely nested
   layout is checked exactly the same way a flat one is.
+  **Format guarantee:** nested regions are valid HEPS — `heps check`
+  accepts them at any depth today. **Runtime capability:** a specific
+  HUB must separately declare whether its renderer actually supports
+  them (see "Not guaranteed" below) — the format allowing a shape and a
+  renderer implementing it are two different facts, not one.
 - **`capabilities`** — a Layout Definition may declare an empty
   `capabilities: {}` object, reserved for a future renderer to check
   whether it can interpret a given Layout Definition at all (e.g. a
@@ -135,12 +142,12 @@ it; the two mechanisms never fall back on each other.
 
 ## Not guaranteed
 
-- **That a target HUB's renderer actually handles a nested (nested inside
-  nested) Region tree correctly.** The validator accepts arbitrary
-  recursion structurally — that's a statement about the *format*, not a
-  promise every renderer already implements it. A Layout Definition that
+- **The runtime capability half of recursion.** Format guarantee and
+  runtime capability are not the same fact: `heps check` accepting a
+  deeply nested Region tree says nothing about whether a target HUB's
+  renderer actually interprets it correctly. A Layout Definition that
   declares more structure than a specific HUB's current renderer
-  interprets is exactly the case a real install-time check exists to
+  supports is exactly the case a real install-time check exists to
   catch, not something a bare local `heps check` can rule out.
 - **The Surface Outlet Registry's actual contents**, i.e. which Outlet
   names exist per Surface at all — entirely HUB-owned, and not something
