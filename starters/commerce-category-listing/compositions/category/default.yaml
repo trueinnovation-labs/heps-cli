@@ -3,12 +3,16 @@ slots:
   # category-promo-banner is a real HUB module. Whether it's registered
   # on the specific HUB you're installing to has to be confirmed by that
   # HUB's operator — this starter and the CLI have no way to check that
-  # themselves. This starter demonstrates title and description (its two
-  # required fields) and eyebrow (optional) only — it has more fields
-  # than that, but a full, published field contract doesn't exist yet.
+  # themselves. This starter demonstrates title, description (its two
+  # required fields), eyebrow, and imageUrl (both optional) — it has
+  # more fields than that (presentation, cta.label, cta.href, media,
+  # priority — see docs/contracts/module-capabilities/ for the full,
+  # verified set), but a full, published field contract doesn't exist
+  # yet for every HUB module, only for this one starter's own module.
   - id: category.intro
     moduleKind: category-promo-banner
     fields:
       eyebrow: "Category"
       title: "Commerce Category Listing Starter"
       description: "Tell your customers what makes this category worth shopping. The product grid below is rendered live from your connected commerce backend."
+      imageUrl: "asset://mark.svg"

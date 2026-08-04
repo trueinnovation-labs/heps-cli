@@ -11,6 +11,7 @@
 .category-promo-banner__title {
   font-family: Georgia, "Times New Roman", serif;
   letter-spacing: 0.01em;
+  color: var(--color-text);
 }
 
 /* listing.navigation */

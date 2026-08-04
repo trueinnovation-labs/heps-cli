@@ -3,6 +3,17 @@
 A HEPS v2 category design that owns its own Layout — the pattern a real
 commerce category **listing** page needs, not a generic built-in one.
 
+**This is the official reference project** — not VELA, not Nova
+Commerce, not an internal code path. Every public HEPS capability is
+demonstrated here first, and `heps inspect` (both with and without
+`--capabilities`) reports **zero warnings** against this starter's own
+files — a package-owned Layout, an open Theme with every token
+consumed, a real referenced Asset, a Composition using a real HUB
+module's real fields, and CSS that only ever targets the [Design
+Surface Registry](../../docs/contracts/design-surfaces/)'s six
+committed selectors. If a new HEPS capability doesn't work here, it
+isn't done yet.
+
 **Listing only.** The HUB resolves a category to one of two different
 runtime paths — Browse (a top-level hub with subcategory tiles, no
 product grid) or Listing (a leaf category with real products). This
@@ -35,16 +46,18 @@ Five files, each with one job, wired together in this order:
    `color.primary` becomes `--color-primary`. HEPS enforces no fixed
    token vocabulary — whether a token changes anything visible depends
    on whether the target HUB's own styles happen to read that variable
-   name. The seven names this starter actually uses (`color.primary`,
-   `color.primary-contrast`, `color.surface`, `color.surface-muted`,
-   `color.text`, `color.text-muted`, `color.border`) were checked
-   against one reference HUB's theme CSS and confirmed consumed there —
-   they are a *demonstrated-working example*, not a guarantee for every
-   HUB. See "Stable CSS hooks" below for what `overrides.css` is allowed
-   to target.
+   name. The five names this starter uses (`color.primary`,
+   `color.surface`, `color.surface-muted`, `color.text`, `color.border`)
+   were checked against one reference HUB's theme CSS, confirmed
+   consumed there, and every one of them is actually referenced by this
+   starter's own `overrides.css` — `heps inspect` would flag any that
+   weren't (`UNUSED_LOCAL_TOKEN`). A *demonstrated-working example*, not
+   a guarantee for every HUB. See "Stable CSS hooks" below for what
+   `overrides.css` is allowed to target.
 5. **`assets/`** — package-owned files, referenced from composition fields
-   as `asset://<path>`. Unused in this starter (the intro slot is
-   text-only) but part of the canonical contract regardless.
+   as `asset://<path>`. `assets/mark.svg` is referenced from the intro
+   slot's `imageUrl` field — a real, working `asset://` round trip, not
+   an empty placeholder directory.
 
 ## Using this starter
 
@@ -87,12 +100,23 @@ heps check dist/<package-id>-<version>
 ```
 
 `category-promo-banner` (the one module this starter uses) is a real HUB
-module — but which modules exist, and which fields each one accepts, is
-a fact about the specific HUB you're installing to, not something this
-CLI or this starter can check. Module availability has to be confirmed
-by whoever operates that HUB before you install there. A public
-module/field contract you could check yourself, without asking anyone,
-is planned but doesn't exist yet.
+module — but which modules exist on a given HUB, and which fields each
+one accepts, is a fact about that specific HUB, not something this CLI
+or this starter can check on its own. Module availability still has to
+be confirmed by whoever operates that HUB before you install there. For
+this one module specifically, though, its real field set is written
+down and checkable:
+
+```
+heps inspect . --capabilities ../../docs/contracts/module-capabilities/category-listing.example.json
+```
+
+reports every field `category-promo-banner` accepts, which are
+required, and warns (`MISSING_REQUIRED_MODULE_FIELD`,
+`UNKNOWN_MODULE_FIELD`, with a typo suggestion) if this starter's own
+composition ever drifts from it. A general catalog covering every
+module on every HUB is still planned, not built — this is one real,
+working example of the format, not the format's full coverage.
 
 ## Stable CSS hooks
 

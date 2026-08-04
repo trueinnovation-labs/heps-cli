@@ -61,9 +61,24 @@ test("commerce-category-listing: generated CSS variables and used selectors are 
   assert.match(out, /\.product-teaser-card__price/);
 });
 
-test("commerce-category-listing: real unreferenced asset (assets/README.txt) is warned about", () => {
+test("commerce-category-listing: mark.svg is a real, referenced asset — no UNREFERENCED_ASSET", () => {
   const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
-  assert.match(out, /UNREFERENCED_ASSET\s+asset:\/\/README\.txt/);
+  assert.doesNotMatch(out, /UNREFERENCED_ASSET/);
+  assert.match(out, /Assets: 1/);
+});
+
+test("Starter Showcase v1: the official reference starter reports zero heps inspect warnings, with and without --capabilities", () => {
+  const withoutCapabilities = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
+  assert.match(withoutCapabilities, /Warnings\n {2}\(none\)/);
+  assert.match(withoutCapabilities, /Inspect complete\n/);
+  assert.doesNotMatch(withoutCapabilities, /Inspect complete with warnings/);
+
+  const withCapabilities = runCli([
+    "inspect", path.join(STARTERS_ROOT, "commerce-category-listing"),
+    "--capabilities", path.join(__dirname, "..", "docs", "contracts", "module-capabilities", "category-listing.example.json"),
+  ]);
+  assert.match(withCapabilities, /Warnings\n {2}\(none\)/);
+  assert.doesNotMatch(withCapabilities, /Inspect complete with warnings/);
 });
 
 test("minimal: has no layouts/ at all — no Layout section, no crash", () => {
