@@ -20,7 +20,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { HEPS_V2_PACKAGE_ENTRIES } from "../dist/sdk/index.js";
+import { HEPS_V2_PACKAGE_ENTRIES } from "../lib/sdk/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(__dirname, "..", "bin", "heps.js");

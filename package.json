@@ -7,13 +7,13 @@
     "heps": "./bin/heps.js"
   },
   "scripts": {
-    "build":          "tsc",
+    "build":          "node scripts/clean.mjs && tsc",
     "test":           "npm run build && node --test",
     "prepublishOnly": "npm run build"
   },
   "files": [
     "bin/",
-    "dist/",
+    "lib/",
     "starters/"
   ],
   "keywords": ["heps", "commerce", "experience", "theme", "cli"],

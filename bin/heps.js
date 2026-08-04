@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { dispatch } from "../dist/cli.js";
+import { dispatch } from "../lib/cli.js";
 
 dispatch(process.argv.slice(2)).catch((err) => {
   console.error(err instanceof Error ? err.message : String(err));

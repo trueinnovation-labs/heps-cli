@@ -159,7 +159,7 @@ test("a defined token referenced normally does not trigger UNDEFINED_TOKEN_REFER
 
 test("a missing or invalid registry file produces a clear note, not a crash (loadDesignSurfaceRegistry, direct)", async () => {
   const { loadDesignSurfaceRegistry } = await import(
-    path.join(__dirname, "..", "dist", "commands", "inspect.js")
+    path.join(__dirname, "..", "lib", "commands", "inspect.js")
   );
 
   const missing = loadDesignSurfaceRegistry(path.join(tmpDir(), "does-not-exist.json"));
