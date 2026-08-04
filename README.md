@@ -181,6 +181,13 @@ Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modul
 
 ---
 
+## What HEPS can do
+
+[`docs/capabilities.md`](./docs/capabilities.md) — "can HEPS do X,
+today?" A product overview, not a tutorial or a contract: one table,
+real proof pointers, including the places a capability turned out to
+already exist once someone actually checked instead of assuming.
+
 ## What HEPS guarantees
 
 [`docs/design-contract.md`](./docs/design-contract.md) — what belongs to
