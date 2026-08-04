@@ -186,6 +186,11 @@ you, what belongs to the HUB, what `heps check` actually enforces vs.
 what's convention, grounded in this CLI's own `src/sdk/` exports so it
 can never drift further from the code than this document lets it.
 
+[`docs/contracts/layout-contract.md`](./docs/contracts/layout-contract.md) —
+the detailed split-out of the Layout chapter: Region/Slot/Outlet Node,
+the Outlet Binding Rule, Region Identity, and the Surface Outlet
+Registry's ownership boundary.
+
 [`docs/contracts/design-surfaces/`](./docs/contracts/design-surfaces/) —
 a stable semantic name (`listing.card.price`) for each already-committed
 CSS selector, so the name an agency learns can outlive the implementation

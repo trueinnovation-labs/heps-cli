@@ -36,11 +36,14 @@ It is **not**:
 - a substitute for reading `starters/commerce-category-listing` yourself —
   it's the worked example every chapter below points back to
 
-Later, this single document splits into `contracts/layout-contract.md`,
-`contracts/composition-contract.md`, `contracts/theme-contract.md`, and
-`contracts/css-hooks.md`. Not yet — a reader who has to jump between five
-files before they understand *any* of them is worse off than a reader
-who has three "Guaranteed" bullets undocumented.
+This document splits, one chapter at a time, into its own per-topic
+contract once that chapter has enough real substance to earn one — not
+all five at once, since a reader jumping between files before
+understanding *any* of them is worse off than a reader with three
+"Guaranteed" bullets left inline a little longer. Split out so far:
+[`contracts/layout-contract.md`](./contracts/layout-contract.md). Still
+pending: `contracts/composition-contract.md`,
+`contracts/theme-contract.md`, `contracts/css-hooks.md`.
 
 ## Where this comes from
 
@@ -152,54 +155,36 @@ Theme, which Composition(s).
 
 ## 3. Layout (`layouts/<surface>/*.yaml`)
 
+**Split out into its own document:**
+[`docs/contracts/layout-contract.md`](./contracts/layout-contract.md) —
+the three node types (Region/Slot/Outlet), the Outlet Binding Rule,
+Region Identity, the Surface Outlet Registry's ownership boundary, and
+what's explicitly not guaranteed (recursion depth a real renderer
+handles, `allowedSlots` ownership). This chapter stays only as the
+short summary the rest of this document's structure needs.
+
 **Ownership:** split, on purpose. You author the *structure* — which
 regions exist, how they arrange, which Slots you fill. The HUB owns
 what actually renders inside an **Outlet** — live commerce data
 (product count, the product grid itself), never something a package
 hand-authors.
 
-**Guaranteed:**
+**Guaranteed (summary — full rules and Source: lines in the Layout
+Contract):** exactly one of `slot`/`outlet`/`region` per child;
+`arrangement` is `stack` or `columns`; `size` only under `columns`;
+slot/outlet names unique per region, region `id` unique across the
+whole definition; every `outlet` checked for shape, checked for real
+HUB availability only with HUB context.
 
-- Every region child is *exactly one* of `slot`, `outlet`, or `region` —
-  never a combination, never neither.
-  Source: `HepsLayoutChild` (type), `INVALID_REGION_NODE`
-- `arrangement` is one of exactly two values: `stack` or `columns`.
-  Source: `HepsLayoutArrangement` (type), `KNOWN_ARRANGEMENTS`
-- `size` is only accepted on a child whose parent `arrangement` is
-  `columns` — meaningless (and rejected) under `stack`.
-  Source: `SIZE_NOT_ALLOWED_FOR_ARRANGEMENT`
-- Slot/outlet names are unique among siblings; a region `id` is unique
-  across the whole Layout Definition and can't collide with any
-  slot/outlet name.
-  Source: `DUPLICATE_CHILD_NAME`, `DUPLICATE_REGION_ID`
-- Every `outlet` name is well-formed and uniquely named as a leaf node —
-  this CLI's local `heps check` stops there (see "Not guaranteed" below
-  for the part it can't confirm).
-  Source: `OUTLET_NOT_AVAILABLE_FOR_SURFACE` (the check's *shape*; it
-  only fires when a Surface Outlet Registry is supplied)
+**Flexible:** regions nest inside regions to any depth (recursive by
+design); a region `id` is optional, purely a generic-hook address, never
+a style or runtime decision.
 
-**Flexible:**
-
-- Regions nest inside regions to any depth — the shape is recursive by
-  design, even though most packages today (including this starter) only
-  use one level.
-  Source: `HepsLayoutRegionNode` (type)
-- A region `id` is optional — when present, it's only ever used to emit
-  a generic hook (e.g. `data-hub-region`), never to decide arrangement,
-  order, or content.
-
-**Not guaranteed:**
-
-- Whether the Outlet names you use are ones a real target HUB actually
-  provides. Today, one HUB's registry has exactly one entry:
-  `category → [listingContent, productNavigation]` — but which outlets
-  exist per Surface is entirely HUB-owned, not part of this format, and
-  this CLI's local `heps check` has no such registry to check against
-  (a bare `ValidationContext` supplies none), so a made-up outlet name
-  passes locally and only fails later, with real HUB context, at
-  install time. There is no public, per-surface catalog to look this up
-  against yourself yet.
-  Source: `ValidationContext.surfaceOutletRegistry`
+**Not guaranteed:** which Outlet names a real target HUB actually
+provides (HUB-owned, not part of this format); whether a real renderer
+handles deep recursion, not just the flat trees every current package
+happens to use; whether `allowedSlots` should belong to the module or
+the layout (open, tracked, not resolved here).
 
 **Example:** [`starters/commerce-category-listing/layouts/category/agency-listing.yaml`](../starters/commerce-category-listing/layouts/category/agency-listing.yaml)
 
