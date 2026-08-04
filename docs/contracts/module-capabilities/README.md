@@ -37,10 +37,11 @@ have one, not a registry `heps-cli` ships or maintains.
   currently cross-checked.
 - **`allowedSlots`** / **`surfaces`** — shown in `heps inspect`'s report
   for context; not currently cross-checked against a composition's
-  actual slot ids (a real, known gap — see `category-listing.example.json`,
-  which lists this starter's own `category.intro` nowhere in
-  `category-promo-banner`'s `allowedSlots`, and nothing in this PR flags
-  that; slot-allowlist validation is future scope, not this one).
+  actual slot ids. See
+  [`../composition-contract.md`](../composition-contract.md#part-3--open-question-who-owns-allowedslots-module-01)
+  (MODULE-01) for why — this isn't an oversight to fix later so much as
+  an open question about whether that check even belongs to the module
+  or the layout.
 
 ## What this is not
 

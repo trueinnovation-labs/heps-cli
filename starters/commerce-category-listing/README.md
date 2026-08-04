@@ -120,10 +120,10 @@ working example of the format, not the format's full coverage.
 
 ## Stable CSS hooks
 
-`overrides.css` here targets exactly six selectors — the only ones this
-starter commits to. Everything else in the rendered markup (every other
-class you'd see in a browser's inspector) is internal implementation and
-can change without notice:
+What "stable" means here, the two governance mechanisms behind it, and
+the honest gap (no general, any-HUB CSS Hook Contract exists yet) are
+covered in [`docs/contracts/css-hooks.md`](../../docs/contracts/css-hooks.md).
+This starter's own six, concretely:
 
 | Selector | What it is | Why it's stable |
 |---|---|---|
@@ -134,11 +134,5 @@ can change without notice:
 | `.product-teaser-card__image` | the product image inside a card | same as above |
 | `.product-teaser-card__price` | the price inside a card | same as above |
 
-The first is governed the same way every Composition-authored module is
-(HEPS's own Layout/Composition contract). The other five aren't modules —
-they're rendered by the HUB Runtime inside the `productNavigation` and
-`listingContent` Outlets this starter's layout declares — so no HEPS-level
-mechanism reaches them; they're stable only because one specific
-reference HUB has committed to them with its own test. A different HUB
-is not bound by that commitment until it makes the same one. Don't select
-any other class you see rendered — it isn't part of this promise.
+Don't select any other class you see rendered — it isn't part of this
+promise, on this HUB or any other.

@@ -30,17 +30,23 @@ It is **not**:
   "Where this comes from" below)
 - new validator logic — every rule below already runs today, in
   `heps check`
-- a CSS hook contract, a public module registry, or a slot-ownership
-  change — those are real gaps (see the Theme and Composition chapters),
-  each with its own future, separate contract
+- a public module registry, or a resolution of who should own
+  slot-placement rules — real, still-open gaps, written down honestly
+  (not resolved) in the Composition & Module Contract's MODULE-01
+  section
 - a substitute for reading `starters/commerce-category-listing` yourself —
   it's the worked example every chapter below points back to
 
-Later, this single document splits into `contracts/layout-contract.md`,
-`contracts/composition-contract.md`, `contracts/theme-contract.md`, and
-`contracts/css-hooks.md`. Not yet — a reader who has to jump between five
-files before they understand *any* of them is worse off than a reader
-who has three "Guaranteed" bullets undocumented.
+This document splits, one chapter at a time, into its own per-topic
+contract once that chapter has enough real substance to earn one — not
+all five at once, since a reader jumping between files before
+understanding *any* of them is worse off than a reader with three
+"Guaranteed" bullets left inline a little longer. All four chapters
+that needed one have one now:
+[`contracts/layout-contract.md`](./contracts/layout-contract.md),
+[`contracts/composition-contract.md`](./contracts/composition-contract.md),
+[`contracts/theme-contract.md`](./contracts/theme-contract.md),
+[`contracts/css-hooks.md`](./contracts/css-hooks.md).
 
 ## Where this comes from
 
@@ -152,54 +158,36 @@ Theme, which Composition(s).
 
 ## 3. Layout (`layouts/<surface>/*.yaml`)
 
+**Split out into its own document:**
+[`docs/contracts/layout-contract.md`](./contracts/layout-contract.md) —
+the three node types (Region/Slot/Outlet), the Outlet Binding Rule,
+Region Identity, the Surface Outlet Registry's ownership boundary, and
+what's explicitly not guaranteed (recursion depth a real renderer
+handles, `allowedSlots` ownership). This chapter stays only as the
+short summary the rest of this document's structure needs.
+
 **Ownership:** split, on purpose. You author the *structure* — which
 regions exist, how they arrange, which Slots you fill. The HUB owns
 what actually renders inside an **Outlet** — live commerce data
 (product count, the product grid itself), never something a package
 hand-authors.
 
-**Guaranteed:**
+**Guaranteed (summary — full rules and Source: lines in the Layout
+Contract):** exactly one of `slot`/`outlet`/`region` per child;
+`arrangement` is `stack` or `columns`; `size` only under `columns`;
+slot/outlet names unique per region, region `id` unique across the
+whole definition; every `outlet` checked for shape, checked for real
+HUB availability only with HUB context.
 
-- Every region child is *exactly one* of `slot`, `outlet`, or `region` —
-  never a combination, never neither.
-  Source: `HepsLayoutChild` (type), `INVALID_REGION_NODE`
-- `arrangement` is one of exactly two values: `stack` or `columns`.
-  Source: `HepsLayoutArrangement` (type), `KNOWN_ARRANGEMENTS`
-- `size` is only accepted on a child whose parent `arrangement` is
-  `columns` — meaningless (and rejected) under `stack`.
-  Source: `SIZE_NOT_ALLOWED_FOR_ARRANGEMENT`
-- Slot/outlet names are unique among siblings; a region `id` is unique
-  across the whole Layout Definition and can't collide with any
-  slot/outlet name.
-  Source: `DUPLICATE_CHILD_NAME`, `DUPLICATE_REGION_ID`
-- Every `outlet` name is well-formed and uniquely named as a leaf node —
-  this CLI's local `heps check` stops there (see "Not guaranteed" below
-  for the part it can't confirm).
-  Source: `OUTLET_NOT_AVAILABLE_FOR_SURFACE` (the check's *shape*; it
-  only fires when a Surface Outlet Registry is supplied)
+**Flexible:** regions nest inside regions to any depth (recursive by
+design); a region `id` is optional, purely a generic-hook address, never
+a style or runtime decision.
 
-**Flexible:**
-
-- Regions nest inside regions to any depth — the shape is recursive by
-  design, even though most packages today (including this starter) only
-  use one level.
-  Source: `HepsLayoutRegionNode` (type)
-- A region `id` is optional — when present, it's only ever used to emit
-  a generic hook (e.g. `data-hub-region`), never to decide arrangement,
-  order, or content.
-
-**Not guaranteed:**
-
-- Whether the Outlet names you use are ones a real target HUB actually
-  provides. Today, one HUB's registry has exactly one entry:
-  `category → [listingContent, productNavigation]` — but which outlets
-  exist per Surface is entirely HUB-owned, not part of this format, and
-  this CLI's local `heps check` has no such registry to check against
-  (a bare `ValidationContext` supplies none), so a made-up outlet name
-  passes locally and only fails later, with real HUB context, at
-  install time. There is no public, per-surface catalog to look this up
-  against yourself yet.
-  Source: `ValidationContext.surfaceOutletRegistry`
+**Not guaranteed:** which Outlet names a real target HUB actually
+provides (HUB-owned, not part of this format); whether a real renderer
+handles deep recursion, not just the flat trees every current package
+happens to use; whether `allowedSlots` should belong to the module or
+the layout (open, tracked, not resolved here).
 
 **Example:** [`starters/commerce-category-listing/layouts/category/agency-listing.yaml`](../starters/commerce-category-listing/layouts/category/agency-listing.yaml)
 
@@ -207,38 +195,29 @@ hand-authors.
 
 ## 4. Composition (`compositions/<surface>/*.yaml`)
 
+**Split out into its own document:**
+[`docs/contracts/composition-contract.md`](./contracts/composition-contract.md) —
+the Composition/Slot rules below in full, plus what a **module**
+actually is (HUB-owned capability, not part of this format at all), the
+Module Capability Catalog, and MODULE-01, the open question of whether
+`allowedSlots` belongs to the module or the layout.
+
 **Ownership:** yours. A Composition fills the Slots a Layout declares —
 never the Outlets.
 
-**Guaranteed:**
+**Guaranteed (summary):** slot `id`s unique per file; every Layout Slot
+has a matching Composition slot; `entityKey` matches its filename stem
+(warning only).
 
-- Slot `id`s are unique within one Composition file.
-  Source: `DUPLICATE_SLOT`
-- Every slot Layout declares must have a matching slot `id` in the
-  paired Composition (see Template chapter — this is where that
-  binding actually lives).
-  Source: `SLOT_NOT_IN_COMPOSITION`
-- A Composition's `entityKey` should match its filename stem
-  (`default.yaml` → no `entityKey`; anything else → `entityKey` equal
-  to the filename) — checked, but only as a warning.
-  Source: `INCONSISTENT_ENTITY_KEY`
+**Flexible:** everything under a slot's `fields:` — owned entirely by
+that slot's `moduleKind`, not by this format; `entityKey` omitted or
+scoped to one entity.
 
-**Flexible:**
-
-- Everything under `fields:` for a given slot — shape and meaning are
-  entirely owned by that slot's `moduleKind`, not by heps-core.
-- `entityKey` — omit it for a Composition that applies to any entity on
-  that Surface, or scope it to one specific category/product/etc.
-
-**Not guaranteed:**
-
-- Whether a given `moduleKind` is registered on the HUB you're
-  installing to, and which `fields` it actually accepts. `heps check`
-  only enforces this when the caller explicitly supplies a module
-  registry (`ValidationContext.knownModuleKinds`) — which never happens
-  for a bare, local `heps check`. This is checked for real only once,
-  with HUB context, at install time.
-  Source: `ValidationContext`, `UNKNOWN_MODULE_KIND`
+**Not guaranteed:** whether a `moduleKind` is registered on the target
+HUB and which fields it accepts (checked only with HUB context, at
+install time); whether the module you chose was ever meant to occupy
+that particular slot at all — this format checks that the slot `id`
+matches, never that the module belongs there (MODULE-01, unresolved).
 
 **Example:** [`starters/commerce-category-listing/compositions/category/default.yaml`](../starters/commerce-category-listing/compositions/category/default.yaml)
 
@@ -246,54 +225,29 @@ never the Outlets.
 
 ## 5. Theme (`themes/<name>/tokens.json` + `overrides.css`)
 
+**Split out into two documents** — tokens and selectors are different
+kinds of fact, so they got separate contracts instead of one that
+conflates them:
+[`docs/contracts/theme-contract.md`](./contracts/theme-contract.md) (the
+open token namespace, the dot-path → CSS-variable rule, and why
+consumption is never guaranteed) and
+[`docs/contracts/css-hooks.md`](./contracts/css-hooks.md) (scoping, the
+disallowed-selector rule, and what "stable hook" actually means — two
+different governance mechanisms, and the honest admission that no
+general, format-level CSS Hook Contract exists yet).
+
 **Ownership:** entirely yours.
 
-**Guaranteed:**
+**Guaranteed (summary):** open token namespace, every dot-path becomes
+its own scoped CSS variable verbatim; `overrides.css` auto-scoped to
+your package; a small set of global selectors rejected outright.
 
-- `tokens.json` uses an **open token namespace** — there is no fixed
-  vocabulary to look up. Every dot-separated path becomes its own
-  scoped CSS custom property: `color.brand.primary` → the string value
-  `"#1a1a1a"` becomes `--color-brand-primary: #1a1a1a`, verbatim, no
-  camelCase conversion.
-  Source: `flattenTokens` (`installPackageTheme.ts`), `HepsThemeV2` /
-  `HepsTokenGroup` / `HepsTokenLeaf` (types)
-- `overrides.css` is scoped to your package automatically —
-  `[data-composition-theme="<your-package-id>"]` wraps every generated
-  rule; you don't write the scope yourself.
-- A small set of global/unscoped selectors are rejected outright:
-  `body`, `html`, `*`, `:root`, and attribute selectors on `class`/`id`.
-  Source: `DISALLOWED_CSS_RE`, `DISALLOWED_CSS_SELECTOR`
+**Flexible:** the entire shape of `tokens.json` is yours to design.
 
-**Flexible:**
-
-- The entire shape of `tokens.json` — group names, nesting depth,
-  naming — is yours to design. There's no reserved top-level key.
-
-**Not guaranteed:**
-
-- That a generated CSS variable does anything visible. Every token you
-  write becomes a real `--custom-property` — but whether the target
-  HUB's own component styles actually *read* that variable is a fact
-  about that HUB's CSS, not about your `tokens.json`. Producing a
-  variable is guaranteed; consumption is not. `starters/commerce-category-listing`'s
-  seven tokens were checked against one reference HUB's CSS and
-  confirmed consumed there — a demonstrated-working example, not a
-  guarantee for every HUB.
-- A general, HEPS-format-level CSS Hook Contract. What exists today is
-  narrower and HUB-specific: one reference HUB has committed, with its
-  own regression tests, to six selectors staying stable for the Listing
-  surface (one Composition-module hook via Law 16's `theme.elements`,
-  five more on Outlet-rendered content that Law 16 structurally can't
-  reach — see `starters/commerce-category-listing/README.md`, "Stable
-  CSS hooks"). Every other class in the rendered markup — on any HUB —
-  is internal implementation and can change without notice. A public,
-  HEPS-level CSS Hook Contract that any HUB could commit to the same way
-  is still a real gap (see "What this is (and isn't)").
-  `docs/contracts/design-surfaces/category-listing.json` gives these six
-  a stable semantic name (`listing.card.price`, etc.) separate from the
-  selector — DESIGN-01, the first step toward that gap not mattering as
-  much, since the name an agency learns wouldn't have to change even
-  when the selector eventually does.
+**Not guaranteed:** that a generated variable does anything visible
+(consumption is a HUB fact); any selector beyond the ones a specific HUB
+has explicitly committed to as stable (see `css-hooks.md`); a general,
+any-HUB CSS Hook Contract — still a real, named gap.
 
 **Example:** [`starters/commerce-category-listing/themes/default/tokens.json`](../starters/commerce-category-listing/themes/default/tokens.json), [`overrides.css`](../starters/commerce-category-listing/themes/default/overrides.css)
 
