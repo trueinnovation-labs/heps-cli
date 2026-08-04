@@ -3,40 +3,56 @@
 Not a tutorial ("how do I...", see the [Designer Guide](./designer-guide.md))
 and not a contract ("what's guaranteed", see [`design-contract.md`](./design-contract.md)
 and the four documents under [`contracts/`](./contracts/)). This answers a
-third, different question, one at a time: **can HEPS do X, today?** Look
-it up, get an answer and a real proof pointer, move on.
+third, different question: **can HEPS do X, today?**
 
-Every row here is checked against actual code or an actual, live,
-installed package — not the format's theoretical shape. Several rows
-below exist *because* someone assumed the answer was "no," checked, and
-found "yes" — that's the whole reason this document exists instead of
-staying folklore.
+This must hold itself to the same standard as the Contracts: state only
+what can actually be shown, never what sounds plausible. So two things
+are tracked separately, not conflated into one checkmark:
 
-| Capability | Status | Proof |
-|---|---|---|
-| Package-owned Layout | ✅ | `starters/commerce-category-listing/layouts/` — [Layout Contract](./contracts/layout-contract.md) |
-| Multiple Slots in one Layout | ✅ | `agency-vela`'s layout declares 5 (Hero, 3 Editorial tiles, plus a Campaign Strip in its Composition) — installed and live, not a demo |
-| Nested Regions | ⚠️ **Format: yes. One specific renderer shape: yes. Generic: no.** | `agency-vela`'s layout nests three levels deep (`root → columns → stack → columns`) and renders correctly — but via `isEditorialStackRegion()`, a shape-specific recognizer in `CategoryListingTemplate.tsx`, not a generic interpreter. Its own comment: *"Interprets exactly two root shapes, nothing else... the walker doesn't reach into generically yet."* A different nesting shape is validated by `heps check` but not proven to render on any HUB — see [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) |
-| Outlet content (live commerce data) | ✅ | `productNavigation`, `listingContent` — [Layout Contract](./contracts/layout-contract.md), Surface Outlet Registry (Layout Contract, "Guaranteed") |
-| Per-entityKey Presentation variants | ✅ **tunes props, doesn't swap components** | `template.presentation` — live in `agency-vela` (`productGrid.columns`, `productCards.priceLayout`, `facets.placement`), wired through to real rendering. No mechanism exists to select an entirely different component per variant (e.g. no `CategoryGridEditorial.tsx`-style swap) |
-| Open Theme Tokens | ✅ | [Theme Contract](./contracts/theme-contract.md) — any dot-path becomes a CSS variable, no fixed vocabulary |
-| Stable CSS Hooks | ✅ **one reference HUB's own commitment, not a format-level contract** | Six selectors, tested — [CSS Hook Contract](./contracts/css-hooks.md), [Design Surface Registry](./contracts/design-surfaces/) |
-| Module field discovery | ✅ **needs an operator-supplied catalog** | `heps inspect --capabilities` — [Module Capability Catalog](./contracts/module-capabilities/) |
-| Real, referenced Assets | ✅ | `starters/commerce-category-listing/assets/mark.svg`, `asset://` round trip |
-| Editorial intro content (module) | ✅ | `category-promo-banner`, Golden Starter's `category.intro` slot |
-| Hero section | ✅ | `hero` module (`allowedSurfaces: ["home", "category"]`), used live by `agency-vela`'s `category.hero` slot |
-| Editorial sections (multi-tile) | ✅ | `agency-vela`'s three Editorial tiles — same `category-promo-banner` module reused with different fields/presentation, not three separate components |
-| Campaign Strip | ✅ | `category-campaign-strip` module, used live by `agency-vela` |
-| Recommendations | ❌ | No Outlet for it — the Surface Outlet Registry has exactly two entries total (`productNavigation`, `listingContent`), both for `category`. Would need a new, HUB-owned Outlet — real Runtime Contract work, not attempted |
-| Related Categories | ❌ | Same reason — no registered Outlet |
+- **Proof** — is the capability real, checked against actual code (this
+  repo's own `src/sdk/`, a public contract) or an actual live/installed
+  package?
+- **Public Example** — can an external agency, with only this
+  repository, go look at that proof themselves? A capability can be
+  entirely real and still have no public example — that gap is exactly
+  as important to state as the capability itself.
+
+Four status levels, not two:
+
+- 🟢 **Verified** — real, and independently checkable from the public
+  repository alone.
+- 🟡 **Verified with limitations** — real, but with a specific, named
+  boundary (a format guarantee that outruns what's proven to render, a
+  mechanism that's public while its real values aren't, etc.).
+- 🔵 **HUB-specific** — not a HEPS format capability at all, a fact
+  about one specific reference HUB (which selectors it committed to,
+  which modules it happens to have registered).
+- ⚪ **Not yet** — deliberately absent, named so it doesn't read as an
+  oversight.
+
+| Capability | Status | Proof | Public Example |
+|---|---|---|---|
+| Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md) | `starters/commerce-category-listing` |
+| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement | none yet — the Golden Starter uses exactly one |
+| Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone | none |
+| Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public | none |
+| Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md) | Golden Starter |
+| Design Surface Registry | 🟢 | [`design-surfaces/`](./contracts/design-surfaces/) | Golden Starter |
+| Stable CSS Hooks | 🔵 | [CSS Hook Contract](./contracts/css-hooks.md) — one reference HUB's own commitment, not a format-level contract | Golden Starter (6 selectors) |
+| Module field discovery | 🟢 needs an operator-supplied catalog | [Composition & Module Contract](./contracts/composition-contract.md), [`module-capabilities/`](./contracts/module-capabilities/) | Golden Starter + `category-listing.example.json` |
+| Real, referenced Assets | 🟢 | [`design-contract.md`, Assets chapter](./design-contract.md) | Golden Starter (`mark.svg`) |
+| Editorial intro content (module) | 🟢 | [Composition & Module Contract](./contracts/composition-contract.md) | Golden Starter |
+| Hero / Editorial / Campaign Strip (specific module roles) | 🔵 | Confirmed to exist on one reference HUB's private source — not independently checkable from this repo, and not even the modules' names are published anywhere public yet | none |
+| Recommendations Outlet | ⚪ | The Golden Starter's own layout only ever declares `productNavigation`/`listingContent` — no public source lists any other Outlet name | — |
+| Related Categories Outlet | ⚪ | Same | — |
 
 ## What this deliberately leaves out
 
 **Anything about a specific HUB's own admin/authoring UI** (a visual
 page builder, drag-and-drop editing, and similar) — that's a private
 Studio feature of one specific HUB, not part of the portable HEPS
-format or this CLI. This map only answers "can a *package* do X," never
-"does *this* HUB's admin tool have feature Y."
+format or this CLI. This map only answers "can a *package* do X,"
+never "does *this* HUB's admin tool have feature Y."
 
 ## Reading this alongside the other documents
 
@@ -46,9 +62,12 @@ Public Contracts →  What's guaranteed if it can?         (design-contract.md +
 Designer Guide   →  How do I actually build it?          (designer-guide.md)
 ```
 
-A ✅ here with a real proof pointer is what makes a Designer Guide
-"Going Further" chapter (multi-section layouts, Presentation variants)
-worth writing next — chapters proven possible first, not chapters
-written on assumption. A ❌ here, if an agency genuinely needs it, is
-what turns into the next real architecture PR — not a guess about what
-might be missing.
+The "Public Example" column is the real roadmap here — not "what
+capability is missing" but **"what capability already exists and has
+no public example yet."** Multiple Slots and Presentation are both real
+(🟢/🟡, backed by the public Layout Contract and `design-contract.md`)
+and both have no public example — that's a Designer Guide "Going
+Further" chapter waiting to be written, not a new feature waiting to be
+built. A 🔵 or ⚪ row, if an agency genuinely needs it, is what turns
+into a real architecture PR — decided from a demonstrated need, not a
+guess about what might be missing.
