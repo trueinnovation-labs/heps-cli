@@ -5,6 +5,24 @@ and not a contract ("what's guaranteed", see [`design-contract.md`](./design-con
 and the four documents under [`contracts/`](./contracts/)). This answers a
 third, different question: **can HEPS do X, today?**
 
+## The Public Capability Law
+
+> A HEPS capability counts as **Verified** only if an external agency
+> can confirm and use it with nothing but the public `heps-cli`
+> repository, the public Contracts, and the official starters. Internal
+> reference packages or private HUB source may supply additional
+> evidence, but never raise a capability's public status on their own.
+
+This is a hard bar, checked, not assumed. "Multiple Slots" below is 🟢
+not because a private reference package uses it, but because a
+second, independently-authored Slot — built from nothing but this
+repository's own Layout Contract and the Module Capability Catalog's
+documented fields — was actually constructed and validated
+(`heps check` → `READY`, zero `heps inspect` warnings) before this row
+was written. A private package can be cited as *additional* evidence
+that a capability holds up in real use — it can never be the reason a
+row is 🟢.
+
 This must hold itself to the same standard as the Contracts: state only
 what can actually be shown, never what sounds plausible. So two things
 are tracked separately, not conflated into one checkmark:
@@ -33,7 +51,7 @@ Four status levels, not two:
 | Capability | Status | Proof | Public Example |
 |---|---|---|---|
 | Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md) | `starters/commerce-category-listing` |
-| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement | none yet — the Golden Starter uses exactly one |
+| Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement. Independently reconstructed and validated per the Public Capability Law above (`heps check` → `READY`, zero `heps inspect` warnings) | not shipped in the Golden Starter itself yet — a Designer Guide "Going Further" chapter, not a runtime gap |
 | Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone | none |
 | Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public | none |
 | Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md) | Golden Starter |
