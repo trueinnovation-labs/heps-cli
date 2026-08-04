@@ -41,9 +41,9 @@ contract once that chapter has enough real substance to earn one — not
 all five at once, since a reader jumping between files before
 understanding *any* of them is worse off than a reader with three
 "Guaranteed" bullets left inline a little longer. Split out so far:
-[`contracts/layout-contract.md`](./contracts/layout-contract.md). Still
-pending: `contracts/composition-contract.md`,
-`contracts/theme-contract.md`, `contracts/css-hooks.md`.
+[`contracts/layout-contract.md`](./contracts/layout-contract.md),
+[`contracts/composition-contract.md`](./contracts/composition-contract.md).
+Still pending: `contracts/theme-contract.md`, `contracts/css-hooks.md`.
 
 ## Where this comes from
 
@@ -192,38 +192,29 @@ the layout (open, tracked, not resolved here).
 
 ## 4. Composition (`compositions/<surface>/*.yaml`)
 
+**Split out into its own document:**
+[`docs/contracts/composition-contract.md`](./contracts/composition-contract.md) —
+the Composition/Slot rules below in full, plus what a **module**
+actually is (HUB-owned capability, not part of this format at all), the
+Module Capability Catalog, and MODULE-01, the open question of whether
+`allowedSlots` belongs to the module or the layout.
+
 **Ownership:** yours. A Composition fills the Slots a Layout declares —
 never the Outlets.
 
-**Guaranteed:**
+**Guaranteed (summary):** slot `id`s unique per file; every Layout Slot
+has a matching Composition slot; `entityKey` matches its filename stem
+(warning only).
 
-- Slot `id`s are unique within one Composition file.
-  Source: `DUPLICATE_SLOT`
-- Every slot Layout declares must have a matching slot `id` in the
-  paired Composition (see Template chapter — this is where that
-  binding actually lives).
-  Source: `SLOT_NOT_IN_COMPOSITION`
-- A Composition's `entityKey` should match its filename stem
-  (`default.yaml` → no `entityKey`; anything else → `entityKey` equal
-  to the filename) — checked, but only as a warning.
-  Source: `INCONSISTENT_ENTITY_KEY`
+**Flexible:** everything under a slot's `fields:` — owned entirely by
+that slot's `moduleKind`, not by this format; `entityKey` omitted or
+scoped to one entity.
 
-**Flexible:**
-
-- Everything under `fields:` for a given slot — shape and meaning are
-  entirely owned by that slot's `moduleKind`, not by heps-core.
-- `entityKey` — omit it for a Composition that applies to any entity on
-  that Surface, or scope it to one specific category/product/etc.
-
-**Not guaranteed:**
-
-- Whether a given `moduleKind` is registered on the HUB you're
-  installing to, and which `fields` it actually accepts. `heps check`
-  only enforces this when the caller explicitly supplies a module
-  registry (`ValidationContext.knownModuleKinds`) — which never happens
-  for a bare, local `heps check`. This is checked for real only once,
-  with HUB context, at install time.
-  Source: `ValidationContext`, `UNKNOWN_MODULE_KIND`
+**Not guaranteed:** whether a `moduleKind` is registered on the target
+HUB and which fields it accepts (checked only with HUB context, at
+install time); whether the module you chose was ever meant to occupy
+that particular slot at all — this format checks that the slot `id`
+matches, never that the module belongs there (MODULE-01, unresolved).
 
 **Example:** [`starters/commerce-category-listing/compositions/category/default.yaml`](../starters/commerce-category-listing/compositions/category/default.yaml)
 

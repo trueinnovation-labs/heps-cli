@@ -191,6 +191,12 @@ the detailed split-out of the Layout chapter: Region/Slot/Outlet Node,
 the Outlet Binding Rule, Region Identity, and the Surface Outlet
 Registry's ownership boundary.
 
+[`docs/contracts/composition-contract.md`](./docs/contracts/composition-contract.md) —
+the detailed split-out of the Composition chapter: Slot binding rules,
+what a module actually is (HUB-owned, not part of this format), and
+MODULE-01, the open question of whether `allowedSlots` belongs to the
+module or the layout.
+
 [`docs/contracts/design-surfaces/`](./docs/contracts/design-surfaces/) —
 a stable semantic name (`listing.card.price`) for each already-committed
 CSS selector, so the name an agency learns can outlive the implementation
