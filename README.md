@@ -22,7 +22,7 @@ known limitations.
 - Not a module registry — it doesn't know what `moduleKind` values exist anywhere
 - Not interactive — no wizards, no prompts; every command takes plain arguments
 
-If you're looking for how to install a built package into a HUB, or what a validation error means, or the full package format spec — that all lives in the HUB repository's docs, linked throughout this README.
+Installation procedures and HUB-specific runtime errors live in the target HUB's operator documentation. The portable package format and this CLI's own validation rules are documented publicly in this repository — see "What HEPS guarantees" below.
 
 ---
 
