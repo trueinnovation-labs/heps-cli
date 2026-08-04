@@ -2,9 +2,9 @@
 
 **Version 0.4.0** ([changelog](./CHANGELOG.md)) · Node ≥18 · MIT
 
-Create, check, build, and inspect [HEPS-100](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
+Create, check, build, and inspect HEPS-100 v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
 
-This CLI is deliberately small: it authors and validates the package *format*. It has no HUB runtime, no module registry, no installer — those live in the HUB repository, on purpose. See [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/known-decisions.md#the-standalone-cli-will-never-get-heps-install-or-heps-uninstall) for why that boundary is permanent, not a gap.
+This CLI is deliberately small: it authors and validates the package *format*. It has no HUB runtime, no module registry, no installer — those live in the HUB's own repository, on purpose, and that repository is **private**: operator-provided, not something you can browse or clone yourself. That boundary is permanent, not a gap — see [`docs/design-contract.md`](./docs/design-contract.md) for what this CLI itself guarantees instead.
 
 **0.4.0 is the HEPS Baseline** — the first release independently
 verified, end to end, from a fresh clone with no HUB source anywhere on
@@ -74,8 +74,8 @@ heps check ../dist/hub.pack.summer-sale-1.0.0       # the built output re-valida
 
 Every step here works with zero HUB access. Installing the built
 package into a running HUB — the only step this repository can't do
-for you — is documented in the HUB repository's own
-[Getting Started](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/getting-started.md#step-5--install-it) guide.
+for you — is documented in that HUB's own operator documentation
+(private, not linkable from here — ask whoever runs your target HUB).
 
 ---
 
@@ -235,13 +235,17 @@ Documented deliberately, not silently deferred — full detail in
 
 ## Full documentation
 
-Everything past `heps build` — installing into a HUB, the Campaign-First delivery model, every validation error and what it means, and the complete HEPS-100 format spec — lives in the HUB repository:
+Everything up to and including `heps build`/`heps inspect` is documented
+publicly, in this repository — see "What HEPS guarantees" above for the
+full set of Public Contracts.
 
-- [Getting Started](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/getting-started.md) — the full walkthrough, this CLI through to a rendered browser page
-- [Agency Workflow](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/agency-workflow.md) — complete package structure reference, every command on both sides
-- [Troubleshooting](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/troubleshooting.md) — every validation code
-- [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/known-decisions.md) — deliberate scope boundaries, including this CLI's
-- [HEPS-100 Spec](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) — complete format reference
+**Everything past that — installing into a HUB, the Campaign-First
+delivery model, and any HUB-specific validation error — is
+operator-provided documentation living in that HUB's own, private
+repository.** Not linkable from here, on purpose: this CLI has no way to
+know which HUB you're installing to, and a link to one specific
+operator's private docs would be misleading for every other one. Ask
+whoever runs your target HUB.
 
 ---
 
