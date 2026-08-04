@@ -1,6 +1,6 @@
 {
   "name": "@heps/cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "HEPS CLI — create, check and build HEPS v2 design packages.",
   "type": "module",
   "bin": {

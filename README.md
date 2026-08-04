@@ -1,10 +1,18 @@
 # @heps/cli
 
-**Version 0.3.0** · Node ≥18 · MIT
+**Version 0.4.0** ([changelog](./CHANGELOG.md)) · Node ≥18 · MIT
 
-Create, check, and build [HEPS-100](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
+Create, check, build, and inspect [HEPS-100](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/heps-100.md) v2 design packages — the portable format a HUB-compatible storefront installs to drive its home, category, PDP, cart, and checkout experiences.
 
 This CLI is deliberately small: it authors and validates the package *format*. It has no HUB runtime, no module registry, no installer — those live in the HUB repository, on purpose. See [Known Decisions](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/known-decisions.md#the-standalone-cli-will-never-get-heps-install-or-heps-uninstall) for why that boundary is permanent, not a gap.
+
+**0.4.0 is the HEPS Baseline** — the first release independently
+verified, end to end, from a fresh clone with no HUB source anywhere on
+disk. `starters/commerce-category-listing` is the **Golden Starter**:
+the official reference project, not a fixture — `heps inspect` reports
+zero warnings against it, in every mode this CLI has. See
+[CHANGELOG.md](./CHANGELOG.md) for what that covers and its documented,
+known limitations.
 
 ---
 
@@ -43,6 +51,31 @@ or link it onto your `PATH` for a plain `heps` command:
 npm link
 heps create my-brand
 ```
+
+---
+
+## The Golden Flow
+
+The full loop this CLI supports, start to finish, against the Golden
+Starter:
+
+```bash
+heps create summer-sale -p commerce-category-listing
+cd summer-sale
+
+# edit compositions/category/default.yaml, themes/default/tokens.json,
+# themes/default/overrides.css, layouts/category/*.yaml — whatever you want
+
+heps inspect .                                    # what did I build? any warnings?
+heps check .                                       # is it structurally valid?
+heps build .                                        # package it for distribution
+heps check ../dist/hub.pack.summer-sale-1.0.0       # the built output re-validates too
+```
+
+Every step here works with zero HUB access. Installing the built
+package into a running HUB — the only step this repository can't do
+for you — is documented in the HUB repository's own
+[Getting Started](https://github.com/trueinnovation-labs/edge-delivery-commerce-hub/blob/main/docs/heps/getting-started.md#step-5--install-it) guide.
 
 ---
 
@@ -163,6 +196,21 @@ folder's own README for the rule.
 the format `heps inspect --capabilities` reads: which `moduleKind`s a HUB
 has registered and what fields each one accepts. The HUB owns this data;
 this CLI only reads a file you point it at.
+
+## Known limitations
+
+Documented deliberately, not silently deferred — full detail in
+[CHANGELOG.md](./CHANGELOG.md#known-scope-and-limitations):
+
+- The Module Capability Catalog format is real and working, but covers
+  exactly one module (`category-promo-banner`) as a demonstrated
+  example — not a catalog for every module on any HUB.
+- Whether `allowedSlots` belongs to the module or the layout is an open
+  question; nothing here checks a composition's slot choice against it.
+- The Design Surface Registry covers the `category-listing` surface
+  only.
+- No local runtime preview (`heps dev`) — inspecting and validating a
+  package is fully local; seeing it rendered requires a real HUB.
 
 ## Full documentation
 
