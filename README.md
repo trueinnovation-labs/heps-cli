@@ -197,6 +197,16 @@ what a module actually is (HUB-owned, not part of this format), and
 MODULE-01, the open question of whether `allowedSlots` belongs to the
 module or the layout.
 
+[`docs/contracts/theme-contract.md`](./docs/contracts/theme-contract.md) —
+the open token namespace, the dot-path → CSS-variable rule, and why
+producing a variable is guaranteed but a HUB actually consuming it never
+is.
+
+[`docs/contracts/css-hooks.md`](./docs/contracts/css-hooks.md) — scoping,
+the disallowed-selector rule, and the honest headline: no general,
+any-HUB CSS Hook Contract exists yet, only one reference HUB's own
+committed selectors.
+
 [`docs/contracts/design-surfaces/`](./docs/contracts/design-surfaces/) —
 a stable semantic name (`listing.card.price`) for each already-committed
 CSS selector, so the name an agency learns can outlive the implementation
