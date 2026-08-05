@@ -166,7 +166,7 @@ Four advisory warnings, never blocking — HEPS's token namespace is open by des
 - `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
 - `UNDOCUMENTED_DESIGN_SELECTOR` — `overrides.css` uses a selector that isn't part of the [Design Surface Registry](./docs/contracts/design-surfaces/) (today: `category-listing` only — a package targeting a different surface won't be checked against it).
 
-#### `--capabilities <file>` — Module/Field Discovery
+#### `--capabilities <file>` — Runtime Capability Discovery
 
 The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Runtime Capability Catalog](./docs/contracts/runtime-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
 
