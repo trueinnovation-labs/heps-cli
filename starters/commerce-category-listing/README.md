@@ -108,7 +108,7 @@ this one module specifically, though, its real field set is written
 down and checkable:
 
 ```
-heps inspect . --capabilities ../../docs/contracts/module-capabilities/category-listing.example.json
+heps inspect . --capabilities ../../docs/contracts/runtime-capabilities/category-listing.example.json
 ```
 
 reports every field `category-promo-banner` accepts, which are

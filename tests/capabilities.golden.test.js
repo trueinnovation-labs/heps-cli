@@ -7,7 +7,7 @@
 // Map, and the Designer Guide: does the claim actually still hold?
 //
 // One capability per describe block, each built from nothing but public
-// materials (the Contracts + the Module Capability Catalog's documented
+// materials (the Contracts + the Runtime Capability Catalog's documented
 // fields) — never a private reference package, per the Law itself.
 
 import { test } from "node:test";
@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(__dirname, "..", "bin", "heps.js");
 const STARTERS_ROOT = path.join(__dirname, "..", "starters");
 const EXAMPLE_CATALOG = path.join(
-  __dirname, "..", "docs", "contracts", "module-capabilities", "category-listing.example.json",
+  __dirname, "..", "docs", "contracts", "runtime-capabilities", "category-listing.example.json",
 );
 
 function runCli(args, cwd) {
@@ -37,7 +37,7 @@ function tmpDir() {
 //
 // docs/capabilities.md's own claim: a second, independently-authored Slot
 // — built from nothing but the public Layout Contract's rules and the
-// Module Capability Catalog's documented category-promo-banner fields —
+// Runtime Capability Catalog's documented category-promo-banner fields —
 // validates cleanly. No agency-vela, no private source.
 
 test("capability: Multiple Slots — a package-authored second Slot, built from public materials only, is READY with zero inspect warnings", () => {
@@ -60,7 +60,7 @@ test("capability: Multiple Slots — a package-authored second Slot, built from 
   const compositionPath = path.join(pkgDir, "compositions", "category", "default.yaml");
   fs.appendFileSync(
     compositionPath,
-    '  - id: category.editorial\n    moduleKind: category-promo-banner\n    fields:\n      title: "Independently-constructed second slot"\n      description: "Built from the public Layout Contract and Module Capability Catalog only."\n',
+    '  - id: category.editorial\n    moduleKind: category-promo-banner\n    fields:\n      title: "Independently-constructed second slot"\n      description: "Built from the public Layout Contract and Runtime Capability Catalog only."\n',
   );
 
   const checkOutput = runCli(["check", pkgDir]);

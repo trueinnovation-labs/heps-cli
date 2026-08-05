@@ -166,9 +166,9 @@ Four advisory warnings, never blocking — HEPS's token namespace is open by des
 - `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
 - `UNDOCUMENTED_DESIGN_SELECTOR` — `overrides.css` uses a selector that isn't part of the [Design Surface Registry](./docs/contracts/design-surfaces/) (today: `category-listing` only — a package targeting a different surface won't be checked against it).
 
-#### `--capabilities <file>` — Module/Field Discovery
+#### `--capabilities <file>` — Runtime Capability Discovery
 
-The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Module Capability Catalog](./docs/contracts/module-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
+The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Runtime Capability Catalog](./docs/contracts/runtime-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
 
 ```bash
 heps inspect summer-sale --capabilities heps-capabilities.json
@@ -176,8 +176,10 @@ heps inspect summer-sale --capabilities heps-capabilities.json
 
 - `MISSING_REQUIRED_MODULE_FIELD` — a composition slot omits a field its module requires.
 - `UNKNOWN_MODULE_FIELD` — a composition slot sets a field its module doesn't define, with a "did you mean" suggestion for a close typo.
+- `UNKNOWN_OUTLET` — a layout places an Outlet the catalog's `outlets` section doesn't list for any of that layout's declared surfaces. Only runs if the catalog has an `outlets` section for that surface at all.
+- `UNKNOWN_PRESENTATION_VALUE` — a template sets a `presentation` key the catalog's `presentation` section documents with a `values` enum, to a value outside that enum. A key the catalog doesn't mention is never flagged — Presentation stays an open vocabulary, same as Theme Tokens.
 
-Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, no module-field warnings.
+Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, none of these four warnings.
 
 ---
 
@@ -222,19 +224,25 @@ CSS selector, so the name an agency learns can outlive the implementation
 class behind it. Only lists what's already real and tested — see that
 folder's own README for the rule.
 
-[`docs/contracts/module-capabilities/`](./docs/contracts/module-capabilities/) —
+[`docs/contracts/runtime-capabilities/`](./docs/contracts/runtime-capabilities/) —
 the format `heps inspect --capabilities` reads: which `moduleKind`s a HUB
-has registered and what fields each one accepts. The HUB owns this data;
-this CLI only reads a file you point it at.
+has registered and what fields each one accepts, alongside its Outlets
+and consumed tokens. The HUB owns this data; this CLI only reads a file
+you point it at.
 
 ## Known limitations
 
 Documented deliberately, not silently deferred — full detail in
 [CHANGELOG.md](./CHANGELOG.md#known-scope-and-limitations):
 
-- The Module Capability Catalog format is real and working, but covers
-  exactly one module (`category-promo-banner`) as a demonstrated
-  example — not a catalog for every module on any HUB.
+- The Runtime Capability Catalog format is real and working for
+  `modules`, but covers exactly one module (`category-promo-banner`) as
+  a demonstrated example — not a catalog for every module on any HUB.
+  `outlets` and `presentation` are both cross-checked by `heps inspect`
+  now (`UNKNOWN_OUTLET`, `UNKNOWN_PRESENTATION_VALUE`), but
+  `presentation` still has no populated example anywhere in this repo —
+  the checking mechanism is real and tested, the real values an agency
+  would look up in it are not published yet.
 - Whether `allowedSlots` belongs to the module or the layout is an open
   question; nothing here checks a composition's slot choice against it.
 - The Design Surface Registry covers the `category-listing` surface

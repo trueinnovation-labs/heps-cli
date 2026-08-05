@@ -157,7 +157,7 @@ it; the two mechanisms never fall back on each other.
   may occupy) belongs to the module or to the layout.** Both are real,
   currently-live mechanisms in different places, and which one should own
   this decision long-term is an open, tracked question — see
-  [`docs/contracts/module-capabilities/README.md`](./module-capabilities/README.md).
+  [`docs/contracts/runtime-capabilities/README.md`](./runtime-capabilities/README.md).
   Not resolved by this document.
 - **That every visually distinct area of a page needs to be its own
   separate Outlet.** A single Outlet can legitimately stand for an

@@ -199,7 +199,7 @@ the layout (open, tracked, not resolved here).
 [`docs/contracts/composition-contract.md`](./contracts/composition-contract.md) —
 the Composition/Slot rules below in full, plus what a **module**
 actually is (HUB-owned capability, not part of this format at all), the
-Module Capability Catalog, and MODULE-01, the open question of whether
+Runtime Capability Catalog, and MODULE-01, the open question of whether
 `allowedSlots` belongs to the module or the layout.
 
 **Ownership:** yours. A Composition fills the Slots a Layout declares —
