@@ -83,12 +83,15 @@ already models: which Outlet names a given surface actually provides.
 See [`../layout-contract.md`](../layout-contract.md#the-outlet-binding-rule)
 for the Outlet Binding Rule this section documents publicly.
 
-Not currently cross-checked by `heps inspect` — reading this section
-and warning on an outlet name it doesn't list is the next, separate,
-smaller change this schema is written to enable, not something this
-format change does on its own.
+Cross-checked by `heps inspect`: if a layout places an Outlet not
+listed under `outlets` for any of that layout's declared surfaces —
+and the catalog has an `outlets` entry for at least one of them at
+all — that's `UNKNOWN_OUTLET`, advisory only. A surface the catalog's
+`outlets` section says nothing about is never checked; this can only
+ever catch what the catalog was actually told, never invent a closed
+list this format doesn't have.
 
-### `presentation` — new, shape only
+### `presentation` — new
 
 `Record<surface, Record<dotPathKey, { type?, values? }>>` — grounded in
 `HepsTemplateV2.presentation`'s real shape (`HepsPresentationMap`,
@@ -100,13 +103,23 @@ missing half of what [`../../capabilities.md`](../../capabilities.md)'s
 🟡 "Presentation" row names: mechanism real and public, real values not
 published anywhere.
 
-**No populated example exists in `category-listing.example.json` yet.**
-Publishing invented-sounding values (grid column counts, price layout
-names) with no independent verification would be exactly the kind of
-plausible-but-unchecked claim this whole set of documents exists to
-avoid. The first real entry here should arrive once a Designer Guide
-"Going Further" chapter demonstrates one end to end, the same way the
-second Slot chapter proved Multiple Slots before that row could read 🟢.
+Cross-checked by `heps inspect`: a template's `presentation` value for
+a key the catalog documents with a `values` enum, set outside that
+enum, is `UNKNOWN_PRESENTATION_VALUE`, advisory only. A key the catalog
+doesn't mention at all is never flagged — Presentation stays an open
+vocabulary, the same way an unrecognized Theme Token is never rejected
+either.
+
+**No populated example exists in `category-listing.example.json` yet**
+— the check above is real and tested (see `tests/inspect.golden.test.js`),
+but always against a catalog constructed inline in that test, never
+against this repo's own shipped example. Publishing invented-sounding
+values (grid column counts, price layout names) with no independent
+verification would be exactly the kind of plausible-but-unchecked claim
+this whole set of documents exists to avoid. The first real entry here
+should arrive once a Designer Guide "Going Further" chapter demonstrates
+one end to end, the same way the second Slot chapter proved Multiple
+Slots before that row could read 🟢.
 
 ### `tokens` — new
 
@@ -131,13 +144,15 @@ fact is machine-readable.
 - Not enforced by `heps check` — advisory only, same as every other
   `heps inspect` warning; HEPS's module/field contract stays whatever
   the target HUB actually accepts, checked for real at install time.
-- **`outlets` and `presentation` are documented shape, not yet
-  cross-checked.** `heps inspect` reads and displays `modules` today;
-  turning `outlets`/`presentation` into warnings the same way is the
-  next, separate PR this schema exists to enable — bundling it into
-  this change would mix a format change with a behavior change, the
-  same review/rollback reasons CLI Build Output Isolation and Public
-  Contracts were once split into two PRs for.
+- **`outlets` and `presentation` are cross-checked, `heps inspect` never
+  displays them as their own section.** Unlike `modules` (which gets a
+  full `Modules` report section), a catalog's `outlets`/`presentation`
+  data only ever shows up as a warning when something doesn't match —
+  there's no "Outlets (catalog)" or "Presentation (catalog)" section to
+  read.
+- **`presentation` has no real, populated example anywhere in this
+  repo.** The check is real; the values an agency would actually look
+  up in it are not — see the `presentation` section above.
 - `category-listing.example.json` is an illustrative example (this
   starter's one module, its real outlets, and its real consumed
   tokens) — not a published, authoritative HUB catalog. A real HUB

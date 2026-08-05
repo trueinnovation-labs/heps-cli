@@ -190,6 +190,9 @@ function printReport(
         warningLines.push(...buildModuleFieldWarnings(slot.moduleKind, slot.fields, module));
       }
     }
+
+    warningLines.push(...buildOutletWarnings(pkg, capabilities));
+    warningLines.push(...buildPresentationWarnings(pkg, capabilities));
   }
 
   for (const theme of pkg.themes) {
@@ -388,9 +391,9 @@ function buildUndocumentedSelectorWarnings(selectors: string[], registry: Design
 // points it at with --capabilities. No auto-discovery, no default catalog
 // shipped with this CLI. See docs/contracts/runtime-capabilities/README.md.
 //
-// `outlets` and `presentation` are read into the type below but not yet
-// cross-checked against a package's layout/template — that's a separate,
-// smaller follow-up change, not bundled into this schema extension.
+// `outlets` and `presentation` are cross-checked against a package's
+// layout/template (see buildOutletWarnings / buildPresentationWarnings
+// below) — advisory only, same posture as every other inspect warning.
 
 export type ModuleCapabilityField = { type: string; required?: boolean; values?: readonly string[] };
 export type RuntimeCapabilityCatalog = {
@@ -489,6 +492,73 @@ function buildModuleFieldWarnings(
   return warnings;
 }
 
+// ── Outlet / Presentation cross-check (needs catalog.outlets / catalog.presentation) ──
+//
+// Both mirror buildModuleFieldWarnings' own posture: nothing here runs
+// unless the catalog actually declares the relevant section, and an
+// unrecognized key on its own is never enough to warn — only a value the
+// catalog explicitly rules out is. Outlets and Presentation keys are
+// otherwise open (see layout-contract.md's Outlet Binding Rule and
+// HepsPresentationMap's own "opaque passthrough" design) — this can only
+// ever catch what the catalog was told to check, never invent a closed
+// vocabulary this format doesn't have.
+
+function buildOutletWarnings(pkg: LoadedHepsPackageV2, capabilities: RuntimeCapabilityCatalog): string[] {
+  if (!capabilities.outlets) return [];
+  const warnings: string[] = [];
+
+  for (const layout of pkg.layouts) {
+    const surfacesWithKnownOutlets = layout.surfaces.filter((s) => capabilities.outlets![s]);
+    if (surfacesWithKnownOutlets.length === 0) continue;
+
+    const { outletNames } = collectEndpoints(layout.root);
+    for (const outletName of outletNames) {
+      const knownSomewhere = surfacesWithKnownOutlets.some((s) => capabilities.outlets![s]!.includes(outletName));
+      if (!knownSomewhere) {
+        warnings.push(`  UNKNOWN_OUTLET  Outlet "${outletName}" is not listed in the runtime catalog for surface "${layout.surfaces.join(", ")}".`);
+      }
+    }
+  }
+
+  return warnings;
+}
+
+/** Every leaf dot-path -> value pair in a Presentation entry, same nesting convention as flattenFieldPaths. */
+function flattenPresentationEntries(value: unknown, prefix = ""): Array<[string, unknown]> {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return prefix ? [[prefix, value]] : [];
+  }
+  const out: Array<[string, unknown]> = [];
+  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    out.push(...flattenPresentationEntries(val, path));
+  }
+  return out;
+}
+
+function buildPresentationWarnings(pkg: LoadedHepsPackageV2, capabilities: RuntimeCapabilityCatalog): string[] {
+  if (!capabilities.presentation) return [];
+  const warnings: string[] = [];
+
+  for (const template of pkg.templates) {
+    if (!template.presentation) continue;
+    const known = capabilities.presentation[template.surface];
+    if (!known) continue;
+
+    for (const [entityKey, entry] of Object.entries(template.presentation)) {
+      for (const [key, value] of flattenPresentationEntries(entry)) {
+        const def = known[key];
+        if (!def?.values) continue;
+        if (!def.values.includes(value)) {
+          warnings.push(`  UNKNOWN_PRESENTATION_VALUE  Presentation value ${JSON.stringify(value)} for "${key}" (entityKey "${entityKey}") is not listed in the runtime catalog for surface "${template.surface}".`);
+        }
+      }
+    }
+  }
+
+  return warnings;
+}
+
 function stem(filePath: string): string {
   return filePath.replace(/\.ya?ml$/, "");
 }
@@ -506,10 +576,10 @@ Arguments:
   dir                    Package directory. Default: current directory
   --capabilities <file>  Optional Runtime Capability Catalog (see
                          docs/contracts/runtime-capabilities/) — a HUB-owned
-                         file describing which moduleKinds exist and what
-                         fields each accepts. Without it, no "Modules"
-                         section and no MISSING_REQUIRED_MODULE_FIELD /
-                         UNKNOWN_MODULE_FIELD warnings.
+                         file describing which moduleKinds, Outlets, and
+                         Presentation values exist. Without it, no "Modules"
+                         section and none of the catalog-driven warnings
+                         below.
 
 Advisory warnings only — never blocking, never a nonzero exit code on
 their own, never rejecting a token or CSS selector as categorically
@@ -529,6 +599,13 @@ docs/design-contract.md):
                                 slot omits a field its module requires
   UNKNOWN_MODULE_FIELD          (needs --capabilities) a composition
                                 slot sets a field its module doesn't define
+  UNKNOWN_OUTLET                 (needs --capabilities with an "outlets"
+                                section) a layout places an Outlet not
+                                listed for any of its declared surfaces
+  UNKNOWN_PRESENTATION_VALUE    (needs --capabilities with a
+                                "presentation" section) a template sets a
+                                cataloged presentation key to a value
+                                that key's catalog entry doesn't list
 
 This never validates the package (see "heps check" for that) and never
 contacts a HUB.

@@ -176,8 +176,10 @@ heps inspect summer-sale --capabilities heps-capabilities.json
 
 - `MISSING_REQUIRED_MODULE_FIELD` — a composition slot omits a field its module requires.
 - `UNKNOWN_MODULE_FIELD` — a composition slot sets a field its module doesn't define, with a "did you mean" suggestion for a close typo.
+- `UNKNOWN_OUTLET` — a layout places an Outlet the catalog's `outlets` section doesn't list for any of that layout's declared surfaces. Only runs if the catalog has an `outlets` section for that surface at all.
+- `UNKNOWN_PRESENTATION_VALUE` — a template sets a `presentation` key the catalog's `presentation` section documents with a `values` enum, to a value outside that enum. A key the catalog doesn't mention is never flagged — Presentation stays an open vocabulary, same as Theme Tokens.
 
-Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, no module-field warnings.
+Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, none of these four warnings.
 
 ---
 
@@ -236,9 +238,11 @@ Documented deliberately, not silently deferred — full detail in
 - The Runtime Capability Catalog format is real and working for
   `modules`, but covers exactly one module (`category-promo-banner`) as
   a demonstrated example — not a catalog for every module on any HUB.
-  Its `outlets` and `presentation` sections describe a real shape but
-  aren't yet cross-checked by `heps inspect` (no warnings for them yet),
-  and `presentation` has no populated example anywhere in this repo.
+  `outlets` and `presentation` are both cross-checked by `heps inspect`
+  now (`UNKNOWN_OUTLET`, `UNKNOWN_PRESENTATION_VALUE`), but
+  `presentation` still has no populated example anywhere in this repo —
+  the checking mechanism is real and tested, the real values an agency
+  would look up in it are not published yet.
 - Whether `allowedSlots` belongs to the module or the layout is an open
   question; nothing here checks a composition's slot choice against it.
 - The Design Surface Registry covers the `category-listing` surface
