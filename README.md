@@ -168,7 +168,7 @@ Four advisory warnings, never blocking — HEPS's token namespace is open by des
 
 #### `--capabilities <file>` — Module/Field Discovery
 
-The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Module Capability Catalog](./docs/contracts/module-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
+The recurring Golden Test finding since the very first one: an agency knows a `moduleKind` exists but not reliably which fields it accepts, which are required, or how to write a nested one. Point `heps inspect` at a [Runtime Capability Catalog](./docs/contracts/runtime-capabilities/) — a small, HUB-owned JSON file, never bundled or auto-discovered by this CLI — and it adds a `Modules` section (required/optional fields, which slot uses each module) plus two more advisory warnings:
 
 ```bash
 heps inspect summer-sale --capabilities heps-capabilities.json
@@ -222,19 +222,23 @@ CSS selector, so the name an agency learns can outlive the implementation
 class behind it. Only lists what's already real and tested — see that
 folder's own README for the rule.
 
-[`docs/contracts/module-capabilities/`](./docs/contracts/module-capabilities/) —
+[`docs/contracts/runtime-capabilities/`](./docs/contracts/runtime-capabilities/) —
 the format `heps inspect --capabilities` reads: which `moduleKind`s a HUB
-has registered and what fields each one accepts. The HUB owns this data;
-this CLI only reads a file you point it at.
+has registered and what fields each one accepts, alongside its Outlets
+and consumed tokens. The HUB owns this data; this CLI only reads a file
+you point it at.
 
 ## Known limitations
 
 Documented deliberately, not silently deferred — full detail in
 [CHANGELOG.md](./CHANGELOG.md#known-scope-and-limitations):
 
-- The Module Capability Catalog format is real and working, but covers
-  exactly one module (`category-promo-banner`) as a demonstrated
-  example — not a catalog for every module on any HUB.
+- The Runtime Capability Catalog format is real and working for
+  `modules`, but covers exactly one module (`category-promo-banner`) as
+  a demonstrated example — not a catalog for every module on any HUB.
+  Its `outlets` and `presentation` sections describe a real shape but
+  aren't yet cross-checked by `heps inspect` (no warnings for them yet),
+  and `presentation` has no populated example anywhere in this repo.
 - Whether `allowedSlots` belongs to the module or the layout is an open
   question; nothing here checks a composition's slot choice against it.
 - The Design Surface Registry covers the `category-listing` surface

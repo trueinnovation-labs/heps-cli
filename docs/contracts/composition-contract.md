@@ -71,10 +71,10 @@ Outlet Registry is a fact about that HUB's own Outlets
 ([`layout-contract.md`](./layout-contract.md)).
 
 The one place this repository describes that shape at all is the
-[Module Capability Catalog](./module-capabilities/) format — an
+[Runtime Capability Catalog](./runtime-capabilities/) format — an
 optional, HUB-authored JSON file this CLI can read
 (`heps inspect --capabilities <file>`), never ships, never fetches, and
-never verifies against a real HUB. `docs/contracts/module-capabilities/category-listing.example.json`
+never verifies against a real HUB. `docs/contracts/runtime-capabilities/category-listing.example.json`
 demonstrates the format against one real module
 (`category-promo-banner`)'s real, verified field set — one worked
 example, not a catalog covering every module anywhere.
@@ -122,7 +122,7 @@ changing `allowedSlots` anywhere. That's future work, with its own audit
 
 [`starters/commerce-category-listing/compositions/category/default.yaml`](../../starters/commerce-category-listing/compositions/category/default.yaml)
 paired with
-[`docs/contracts/module-capabilities/category-listing.example.json`](./module-capabilities/category-listing.example.json) —
+[`docs/contracts/runtime-capabilities/category-listing.example.json`](./runtime-capabilities/category-listing.example.json) —
 one Composition, one Slot, one real module's real field set, cross-checked
 by `heps inspect --capabilities` with zero warnings (see
 [Starter Showcase](../../starters/commerce-category-listing/README.md)).

@@ -75,7 +75,7 @@ test("Starter Showcase v1: the official reference starter reports zero heps insp
 
   const withCapabilities = runCli([
     "inspect", path.join(STARTERS_ROOT, "commerce-category-listing"),
-    "--capabilities", path.join(__dirname, "..", "docs", "contracts", "module-capabilities", "category-listing.example.json"),
+    "--capabilities", path.join(__dirname, "..", "docs", "contracts", "runtime-capabilities", "category-listing.example.json"),
   ]);
   assert.match(withCapabilities, /Warnings\n {2}\(none\)/);
   assert.doesNotMatch(withCapabilities, /Inspect complete with warnings/);
@@ -174,11 +174,38 @@ test("a missing or invalid registry file produces a clear note, not a crash (loa
   assert.match(invalid.error, /could not be read/);
 });
 
-// ── Module Capability Catalog (--capabilities) ────────────────────────────────
+// ── Runtime Capability Catalog (--capabilities) ────────────────────────────────
 
 const EXAMPLE_CATALOG = path.join(
-  __dirname, "..", "docs", "contracts", "module-capabilities", "category-listing.example.json",
+  __dirname, "..", "docs", "contracts", "runtime-capabilities", "category-listing.example.json",
 );
+
+test("Runtime Capability Catalog v1: outlets and tokens sections match what this repo can independently verify, not invented values", () => {
+  const catalog = JSON.parse(fs.readFileSync(EXAMPLE_CATALOG, "utf8"));
+
+  const layoutYaml = fs.readFileSync(
+    path.join(STARTERS_ROOT, "commerce-category-listing", "layouts", "category", "agency-listing.yaml"),
+    "utf8",
+  );
+  const outletsInLayout = [...layoutYaml.matchAll(/- outlet: (\S+)/g)].map((m) => m[1]).sort();
+  assert.deepEqual([...catalog.outlets.category].sort(), outletsInLayout, "catalog outlets must be exactly what the Golden Starter's own layout declares");
+
+  const tokensJson = JSON.parse(fs.readFileSync(
+    path.join(STARTERS_ROOT, "commerce-category-listing", "themes", "default", "tokens.json"),
+    "utf8",
+  ));
+  const tokenPaths = Object.keys(tokensJson.color).map((k) => `color.${k}`).sort();
+  assert.deepEqual([...catalog.tokens.consumed].sort(), tokenPaths, "catalog consumed tokens must be exactly the Golden Starter's own tokens.json paths");
+});
+
+test("Runtime Capability Catalog v1: outlets/presentation/tokens are read without error but don't yet change heps inspect's report (schema extension, not a behavior change)", () => {
+  const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing"), "--capabilities", EXAMPLE_CATALOG]);
+  assert.match(out, /Modules\n\n {2}category-promo-banner/);
+  assert.match(out, /Warnings\n {2}\(none\)/);
+  assert.doesNotMatch(out, /^Outlets \(catalog\)/m);
+  assert.doesNotMatch(out, /UNKNOWN_OUTLET/);
+  assert.doesNotMatch(out, /UNKNOWN_PRESENTATION_VALUE/);
+});
 
 function writeComposition(dir, fieldsYaml) {
   fs.writeFileSync(
@@ -236,12 +263,12 @@ test("a missing or invalid --capabilities file produces a clear note, not a cras
   copyStarterTo("commerce-category-listing", dir);
 
   const missingOut = runCli(["inspect", dir, "--capabilities", path.join(dir, "does-not-exist.json")]);
-  assert.match(missingOut, /MODULE_CAPABILITY_CATALOG_UNAVAILABLE\s+Module capability catalog not found/);
+  assert.match(missingOut, /RUNTIME_CAPABILITY_CATALOG_UNAVAILABLE\s+Runtime capability catalog not found/);
 
   const brokenPath = path.join(dir, "broken-capabilities.json");
   fs.writeFileSync(brokenPath, "{ not valid json");
   const brokenOut = runCli(["inspect", dir, "--capabilities", brokenPath]);
-  assert.match(brokenOut, /MODULE_CAPABILITY_CATALOG_UNAVAILABLE\s+Module capability catalog could not be read/);
+  assert.match(brokenOut, /RUNTIME_CAPABILITY_CATALOG_UNAVAILABLE\s+Runtime capability catalog could not be read/);
 });
 
 test("--capabilities can come before the directory argument without being mistaken for it", () => {

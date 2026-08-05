@@ -16,7 +16,7 @@ third, different question: **can HEPS do X, today?**
 This is a hard bar, checked, not assumed. "Multiple Slots" below is 🟢
 not because a private reference package uses it, but because a
 second, independently-authored Slot — built from nothing but this
-repository's own Layout Contract and the Module Capability Catalog's
+repository's own Layout Contract and the Runtime Capability Catalog's
 documented fields — was actually constructed and validated
 (`heps check` → `READY`, zero `heps inspect` warnings) before this row
 was written. A private package can be cited as *additional* evidence
@@ -57,7 +57,7 @@ Four status levels, not two:
 | Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md); `tests/inspect.golden.test.js` ("Starter Showcase v1: ... reports zero heps inspect warnings") — run on every `npm test` | Golden Starter |
 | Design Surface Registry | 🟢 | [`design-surfaces/`](./contracts/design-surfaces/); `tests/design-surfaces.golden.test.js` (4 tests: parses, unique IDs, non-empty selectors, exactly the current set) — run on every `npm test` | Golden Starter |
 | Stable CSS Hooks | 🔵 | [CSS Hook Contract](./contracts/css-hooks.md) — one reference HUB's own commitment, not a format-level contract; that HUB's own regression test (not this repo's) is the actual enforcement | Golden Starter (6 selectors) |
-| Module field discovery | 🟢 needs an operator-supplied catalog | [Composition & Module Contract](./contracts/composition-contract.md), [`module-capabilities/`](./contracts/module-capabilities/); `tests/inspect.golden.test.js` (`--capabilities` test block) — run on every `npm test` | Golden Starter + `category-listing.example.json` |
+| Module field discovery | 🟢 needs an operator-supplied catalog | [Composition & Module Contract](./contracts/composition-contract.md), [`runtime-capabilities/`](./contracts/runtime-capabilities/); `tests/inspect.golden.test.js` (`--capabilities` test block) — run on every `npm test` | Golden Starter + `category-listing.example.json` |
 | Real, referenced Assets | 🟢 | [`design-contract.md`, Assets chapter](./design-contract.md); `tests/inspect.golden.test.js` ("mark.svg is a real, referenced asset") — run on every `npm test`, plus a real `heps:install` into a running HUB this session (asset published to `/heps-assets/<packageId>/mark.svg`, confirmed, then cleanly uninstalled) | Golden Starter (`mark.svg`) |
 | Editorial intro content (module) | 🟢 | [Composition & Module Contract](./contracts/composition-contract.md); implied by every Golden Starter test — the entire starter is this capability | Golden Starter |
 | Hero / Editorial / Campaign Strip (specific module roles) | 🔵 | Confirmed to exist on one reference HUB's private source — not independently checkable from this repo, no standing test possible here, and not even the modules' names are published anywhere public yet | none |

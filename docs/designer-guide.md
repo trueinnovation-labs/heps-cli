@@ -192,7 +192,7 @@ full rules instead of the guided version:
 [Theme Tokens](./contracts/theme-contract.md),
 [CSS Hooks](./contracts/css-hooks.md),
 [Design Surfaces](./contracts/design-surfaces/),
-[Module Capabilities](./contracts/module-capabilities/).
+[Runtime Capabilities](./contracts/runtime-capabilities/).
 
 ## Going Further — a second Slot in your Layout
 
@@ -268,7 +268,7 @@ slots:
     moduleKind: category-promo-banner
     fields:
       title: "A second, independent Slot"
-      description: "Built from nothing but this repository's own Layout Contract and Module Capability Catalog."
+      description: "Built from nothing but this repository's own Layout Contract and Runtime Capability Catalog."
 ```
 
 ### 4. Check it
@@ -290,7 +290,7 @@ Nothing here is HUB-specific: the region id, the slot id, and the
 label are all names this package chose, the same way `category.intro`
 was already a name the starter chose. The only fixed part is the
 module (`category-promo-banner`) and its fields, and those come from
-the [Module Capability Catalog](./contracts/module-capabilities/), the
+the [Runtime Capability Catalog](./contracts/runtime-capabilities/), the
 same public source Step 3 already used. See
 [`docs/capabilities.md`](./capabilities.md)'s "Multiple Slots in one
 Layout" row for how this fits into the bigger picture of what HEPS can

@@ -28,5 +28,17 @@
         "priority": { "type": "boolean", "required": false }
       }
     }
+  },
+  "outlets": {
+    "category": ["productNavigation", "listingContent"]
+  },
+  "tokens": {
+    "consumed": [
+      "color.primary",
+      "color.surface",
+      "color.surface-muted",
+      "color.text",
+      "color.border"
+    ]
   }
 }

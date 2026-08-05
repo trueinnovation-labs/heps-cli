@@ -64,10 +64,10 @@ export async function main(args: string[]): Promise<void> {
   }
 
   const capabilitiesPath = readFlag(args, "--capabilities");
-  let capabilities: ModuleCapabilityCatalog | undefined;
+  let capabilities: RuntimeCapabilityCatalog | undefined;
   let capabilitiesError: string | undefined;
   if (capabilitiesPath != null) {
-    const result = loadModuleCapabilities(path.resolve(capabilitiesPath));
+    const result = loadRuntimeCapabilities(path.resolve(capabilitiesPath));
     if ("error" in result) {
       capabilitiesError = result.error;
     } else {
@@ -88,7 +88,7 @@ function readFlag(args: string[], flag: string): string | undefined {
 
 function printReport(
   pkg: LoadedHepsPackageV2,
-  capabilities: ModuleCapabilityCatalog | undefined,
+  capabilities: RuntimeCapabilityCatalog | undefined,
   capabilitiesError: string | undefined,
 ): void {
   const registry = loadDesignSurfaceRegistry(CATEGORY_LISTING_REGISTRY_PATH);
@@ -227,7 +227,7 @@ function printReport(
     warningLines.push(`  DESIGN_SURFACE_REGISTRY_UNAVAILABLE  ${registry.error}`);
   }
   if (capabilitiesError) {
-    warningLines.push(`  MODULE_CAPABILITY_CATALOG_UNAVAILABLE  ${capabilitiesError}`);
+    warningLines.push(`  RUNTIME_CAPABILITY_CATALOG_UNAVAILABLE  ${capabilitiesError}`);
   }
 
   console.log(lines.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd());
@@ -381,32 +381,39 @@ function buildUndocumentedSelectorWarnings(selectors: string[], registry: Design
     .map((selector) => `  UNDOCUMENTED_DESIGN_SELECTOR  Selector "${selector}" is not part of the current category-listing design surface registry.`);
 }
 
-// ── Module Capability Catalog (optional, HUB-owned, never bundled) ──────────
+// ── Runtime Capability Catalog (optional, HUB-owned, never bundled) ─────────
 //
-// The HUB owns which modules exist and what fields they accept — this file
-// only reads a catalog the caller explicitly points it at with
-// --capabilities. No auto-discovery, no default catalog shipped with this
-// CLI. See docs/contracts/module-capabilities/README.md.
+// The HUB owns which modules, outlets, presentation values, and consumed
+// tokens exist — this file only reads a catalog the caller explicitly
+// points it at with --capabilities. No auto-discovery, no default catalog
+// shipped with this CLI. See docs/contracts/runtime-capabilities/README.md.
+//
+// `outlets` and `presentation` are read into the type below but not yet
+// cross-checked against a package's layout/template — that's a separate,
+// smaller follow-up change, not bundled into this schema extension.
 
 export type ModuleCapabilityField = { type: string; required?: boolean; values?: readonly string[] };
-export type ModuleCapabilityCatalog = {
+export type RuntimeCapabilityCatalog = {
   version: string;
   modules: Record<string, {
     surfaces?: readonly string[];
     allowedSlots?: readonly string[];
     fields: Record<string, ModuleCapabilityField>;
   }>;
+  outlets?: Record<string, readonly string[]>;
+  presentation?: Record<string, Record<string, { type?: string; values?: readonly unknown[] }>>;
+  tokens?: { consumed?: readonly string[] };
 };
 
 /** Exported so tests can point this at a bogus path directly (see loadDesignSurfaceRegistry). */
-export function loadModuleCapabilities(catalogPath: string): ModuleCapabilityCatalog | { error: string } {
+export function loadRuntimeCapabilities(catalogPath: string): RuntimeCapabilityCatalog | { error: string } {
   if (!fs.existsSync(catalogPath)) {
-    return { error: `Module capability catalog not found: ${catalogPath}` };
+    return { error: `Runtime capability catalog not found: ${catalogPath}` };
   }
   try {
-    return JSON.parse(fs.readFileSync(catalogPath, "utf8")) as ModuleCapabilityCatalog;
+    return JSON.parse(fs.readFileSync(catalogPath, "utf8")) as RuntimeCapabilityCatalog;
   } catch (err) {
-    return { error: `Module capability catalog could not be read: ${errorMessage(err)}` };
+    return { error: `Runtime capability catalog could not be read: ${errorMessage(err)}` };
   }
 }
 
@@ -459,7 +466,7 @@ function nearestFieldName(unknownField: string, knownFields: readonly string[]):
 function buildModuleFieldWarnings(
   moduleKind: string,
   slotFields: Record<string, unknown> | undefined,
-  module: ModuleCapabilityCatalog["modules"][string],
+  module: RuntimeCapabilityCatalog["modules"][string],
 ): string[] {
   const warnings: string[] = [];
   const knownFieldNames = Object.keys(module.fields);
@@ -497,8 +504,8 @@ assets.
 
 Arguments:
   dir                    Package directory. Default: current directory
-  --capabilities <file>  Optional Module Capability Catalog (see
-                         docs/contracts/module-capabilities/) — a HUB-owned
+  --capabilities <file>  Optional Runtime Capability Catalog (see
+                         docs/contracts/runtime-capabilities/) — a HUB-owned
                          file describing which moduleKinds exist and what
                          fields each accepts. Without it, no "Modules"
                          section and no MISSING_REQUIRED_MODULE_FIELD /
