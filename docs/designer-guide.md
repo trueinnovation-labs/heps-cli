@@ -295,3 +295,105 @@ same public source Step 3 already used. See
 [`docs/capabilities.md`](./capabilities.md)'s "Multiple Slots in one
 Layout" row for how this fits into the bigger picture of what HEPS can
 and can't do today.
+
+## Going Further — Presentation values, checked against a catalog
+
+A Template can carry a `presentation` block: an opaque, per-`entityKey`
+config the compiler passes straight through, never interprets itself —
+see [`design-contract.md`](./design-contract.md)'s Template chapter for
+`HepsPresentationMap`. On its own, that's a format guarantee, not a
+usable example — nothing publicly confirms which keys any HUB's
+renderer actually reads, or what values it accepts. The
+[Runtime Capability Catalog](./contracts/runtime-capabilities/)'s
+`presentation` section exists to close exactly that gap, and this walks
+through using it end to end: your own `heps inspect` catching a bad
+value before you ever install anywhere.
+
+**What this doesn't prove:** whether `productGrid.columns: 3` actually
+renders a 3-column grid on a real HUB is a fact about that HUB's
+renderer, the same way [`theme-contract.md`](./contracts/theme-contract.md)
+is honest that a generated CSS variable might change nothing a customer
+ever sees. What's provable from this repo alone, and what this chapter
+proves, is narrower and still real: `heps inspect` catching a
+presentation value your own catalog says is invalid, before you ever
+install anywhere.
+
+### 1. Add a presentation block to your template
+
+Using the `entityKey` you set in Step 5, open
+`templates/category-listing.yaml`:
+
+```yaml
+surface: category
+entityKey: <your-entity-key>
+layout:
+  provider: hub
+  name: agency-listing
+theme: default
+composition: category/<your-entity-key>
+presentation:
+  <your-entity-key>:
+    productGrid.columns: 3
+```
+
+`presentation` is keyed by the same `entityKey` `compositions:` already
+uses — one Template, one set of presentation values per entity it's
+scoped to. `productGrid.columns` is a name this example chose, not a
+reserved keyword; any dot-path is valid HEPS, the same open-namespace
+rule [`theme-contract.md`](./contracts/theme-contract.md) already
+established for tokens.
+
+### 2. Write the catalog your operator would normally give you
+
+In real use, your target HUB's operator hands you a Runtime Capability
+Catalog with real, already-registered values. None is published
+anywhere public yet — so to actually exercise the check, build a small
+one yourself that matches what you just wrote, the same way
+`tests/inspect.golden.test.js` does for this exact case:
+
+```json
+{
+  "version": "1",
+  "modules": {},
+  "presentation": {
+    "category": {
+      "productGrid.columns": { "type": "number", "values": [2, 3, 4] }
+    }
+  }
+}
+```
+
+Save it as `heps-capabilities.json`, anywhere outside your package
+directory.
+
+### 3. Check it
+
+```bash
+heps inspect . --capabilities heps-capabilities.json
+```
+
+Zero warnings — `3` is one of the catalog's listed values. Now break
+it on purpose: change `productGrid.columns: 3` to `productGrid.columns: 7`
+and run the same command again:
+
+```
+Warnings
+  UNKNOWN_PRESENTATION_VALUE  Presentation value 7 for "productGrid.columns" (entityKey "<your-entity-key>") is not listed in the runtime catalog for surface "category".
+```
+
+Set it back to a listed value, or add `7` to the catalog's own
+`values` array, and the warning disappears — same advisory posture as
+every other `heps inspect` warning: it never blocks `heps check` or
+`heps build`, it only tells you before your operator's own install-time
+check would.
+
+### What this proves, and what it doesn't
+
+The mechanism, the catalog format, and the check are all real and
+independently runnable from nothing but this repository — that's what
+closes [`docs/capabilities.md`](./capabilities.md)'s "Presentation" row
+from "no public example" to a real, checkable one. What stays open,
+deliberately: this repository still can't tell you which presentation
+keys any specific HUB's renderer actually reads, or what a real
+`heps-capabilities.json` for your target HUB contains — that's still an
+operator handoff, same as Step 8's install and activate.

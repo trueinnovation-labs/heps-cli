@@ -53,7 +53,7 @@ Four status levels, not two:
 | Package-owned Layout | 🟢 | [Layout Contract](./contracts/layout-contract.md); `tests/starters.golden.test.js` ("uses a package-owned layout, not one of the HUB's built-in ones") — run on every `npm test` | `starters/commerce-category-listing` |
 | Multiple Slots in one Layout | 🟢 | [Layout Contract, "Guaranteed"](./contracts/layout-contract.md#guaranteed) — no cap on child count, no cap on region depth for Slot placement; `tests/capabilities.golden.test.js` — a standing, CI-run test, not a one-time check: constructs a second Slot from nothing but this repo's own materials and asserts `heps check` → `READY`, zero `heps inspect` warnings | [Designer Guide, "Going Further"](./designer-guide.md#going-further--a-second-slot-in-your-layout) — the same construction, written as a tutorial, independently re-verified end to end |
 | Nested Regions | 🟡 | Format: [Layout Contract, "Not guaranteed"](./contracts/layout-contract.md#not-guaranteed) — `heps check` accepts arbitrary depth. Rendering: confirmed on one reference HUB that its renderer recognizes exactly one specific nested shape via a shape-specific function, not a generic interpreter (RT-2, open) — not independently checkable from this repo alone, no standing test possible here | none |
-| Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough). Real values (e.g. grid columns, price layout): confirmed live on one reference HUB, not published anywhere public, no standing test possible here | none |
+| Presentation (per-`entityKey` variants) | 🟡 | Mechanism: [`design-contract.md`, Template chapter](./design-contract.md) (`HepsPresentationMap`, public, opaque passthrough), now with a real, standing check — [Runtime Capability Catalog](./contracts/runtime-capabilities/)'s `presentation` section + `heps inspect`'s `UNKNOWN_PRESENTATION_VALUE` warning, both covered by `tests/inspect.golden.test.js`. Real values a specific HUB's renderer actually reads (e.g. grid columns, price layout): still not published anywhere public — this repo can prove the checking mechanism, never which values render anything | [Designer Guide, "Presentation values"](./designer-guide.md#going-further--presentation-values-checked-against-a-catalog) — builds a catalog, sets a value, breaks it on purpose, reads the real warning |
 | Theme Tokens (open namespace) | 🟢 | [Theme Contract](./contracts/theme-contract.md); `tests/inspect.golden.test.js` ("Starter Showcase v1: ... reports zero heps inspect warnings") — run on every `npm test` | Golden Starter |
 | Design Surface Registry | 🟢 | [`design-surfaces/`](./contracts/design-surfaces/); `tests/design-surfaces.golden.test.js` (4 tests: parses, unique IDs, non-empty selectors, exactly the current set) — run on every `npm test` | Golden Starter |
 | Stable CSS Hooks | 🔵 | [CSS Hook Contract](./contracts/css-hooks.md) — one reference HUB's own commitment, not a format-level contract; that HUB's own regression test (not this repo's) is the actual enforcement | Golden Starter (6 selectors) |
@@ -94,9 +94,11 @@ no public example yet."** Multiple Slots went through exactly that
 path: real and 🟢 first, backed only by the Layout Contract and its
 Golden Test, with no public example — closed by writing the Designer
 Guide's "Going Further" chapter, the same construction as a tutorial.
-Presentation is still open the same way (🟡, backed by the public
-Layout Contract and `design-contract.md`, mechanism real, values not
-public) — a "Going Further" chapter waiting to be written, not a new
-feature waiting to be built. A 🔵 or ⚪ row, if an agency genuinely
-needs it, is what turns into a real architecture PR — decided from a
-demonstrated need, not a guess about what might be missing.
+Presentation went through the same path next: mechanism and check both
+real, both now with a public example (Designer Guide, "Presentation
+values") — still 🟡, not 🟢, because the boundary that remains is a
+different kind than "no example yet": no real, HUB-consumed
+presentation values are published anywhere public, and no document in
+this repo can change that on its own. A 🔵 or ⚪ row, if an agency
+genuinely needs it, is what turns into a real architecture PR — decided
+from a demonstrated need, not a guess about what might be missing.

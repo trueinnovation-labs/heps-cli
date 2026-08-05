@@ -6,7 +6,7 @@ slots:
   # themselves. This starter demonstrates title, description (its two
   # required fields), eyebrow, and imageUrl (both optional) — it has
   # more fields than that (presentation, cta.label, cta.href, media,
-  # priority — see docs/contracts/module-capabilities/ for the full,
+  # priority — see docs/contracts/runtime-capabilities/ for the full,
   # verified set), but a full, published field contract doesn't exist
   # yet for every HUB module, only for this one starter's own module.
   - id: category.intro
