@@ -346,6 +346,85 @@ test("a presentation key the catalog doesn't mention at all is never flagged —
   assert.doesNotMatch(out, /UNKNOWN_PRESENTATION_VALUE/);
 });
 
+// ── MODULE-01 Slot Placement cross-check (composition-contract.md, Part 3) ──
+
+function writeLayoutWithAccepts(dir, acceptsModuleKinds) {
+  const layoutPath = path.join(dir, "layouts", "category", "agency-listing.yaml");
+  const acceptsYaml = acceptsModuleKinds.map((k) => `              - ${k}\n`).join("");
+  const layout = fs.readFileSync(layoutPath, "utf8").replace(
+    "          - slot: category.intro\n",
+    `          - slot: category.intro\n            accepts:\n${acceptsYaml}`,
+  );
+  fs.writeFileSync(layoutPath, layout);
+}
+
+test("a Slot's own 'accepts' excluding the placed module is warned about (MODULE_NOT_ACCEPTED_BY_SLOT) — no --capabilities needed", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  writeLayoutWithAccepts(dir, ["hot-sellers"]);
+  const out = runCli(["inspect", dir]);
+  assert.match(out, /MODULE_NOT_ACCEPTED_BY_SLOT\s+Slot "category\.intro" accepts \[hot-sellers\], but this composition places "category-promo-banner" there\./);
+});
+
+test("a Slot's own 'accepts' including the placed module produces no warning", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  writeLayoutWithAccepts(dir, ["category-promo-banner", "hot-sellers"]);
+  const out = runCli(["inspect", dir]);
+  assert.doesNotMatch(out, /MODULE_NOT_ACCEPTED_BY_SLOT/);
+});
+
+test("a Slot with no 'accepts' declared at all (the Golden Starter's own default) is never flagged", () => {
+  const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
+  assert.doesNotMatch(out, /MODULE_NOT_ACCEPTED_BY_SLOT/);
+});
+
+test("a catalog module's allowedSlots excluding the actual placement is warned about (SLOT_NOT_ALLOWED_BY_MODULE)", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  const catalogPath = writeCatalog(dir, {
+    version: "1",
+    modules: { "category-promo-banner": { allowedSlots: ["category.hero"], fields: {} } },
+  });
+  const out = runCli(["inspect", dir, "--capabilities", catalogPath]);
+  assert.match(out, /SLOT_NOT_ALLOWED_BY_MODULE\s+Module "category-promo-banner" lists allowedSlots \[category\.hero\], but this composition places it in slot "category\.intro"\./);
+});
+
+test("a catalog module's allowedSlots including the actual placement produces no warning", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  const catalogPath = writeCatalog(dir, {
+    version: "1",
+    modules: { "category-promo-banner": { allowedSlots: ["category.intro", "category.hero"], fields: {} } },
+  });
+  const out = runCli(["inspect", dir, "--capabilities", catalogPath]);
+  assert.doesNotMatch(out, /SLOT_NOT_ALLOWED_BY_MODULE/);
+});
+
+test("a catalog module with no allowedSlots declared at all is never flagged — the module side stays open unless it opts into a restriction", () => {
+  const dir = tmpDir();
+  copyStarterTo("commerce-category-listing", dir);
+  const catalogPath = writeCatalog(dir, {
+    version: "1",
+    modules: { "category-promo-banner": { fields: {} } },
+  });
+  const out = runCli(["inspect", dir, "--capabilities", catalogPath]);
+  assert.doesNotMatch(out, /SLOT_NOT_ALLOWED_BY_MODULE/);
+});
+
+test("without --capabilities, SLOT_NOT_ALLOWED_BY_MODULE never fires, even against a layout/composition that would otherwise mismatch", () => {
+  const out = runCli(["inspect", path.join(STARTERS_ROOT, "commerce-category-listing")]);
+  assert.doesNotMatch(out, /SLOT_NOT_ALLOWED_BY_MODULE/);
+});
+
+test("MODULE-01 fix: the real example catalog's allowedSlots for category-promo-banner now includes category.intro — the Golden Starter's own real placement", () => {
+  const catalog = JSON.parse(fs.readFileSync(EXAMPLE_CATALOG, "utf8"));
+  assert.ok(
+    catalog.modules["category-promo-banner"].allowedSlots.includes("category.intro"),
+    "category.intro is the exact slot the Golden Starter places category-promo-banner in — allowedSlots must include it, or the Starter Showcase's own zero-warnings claim would break",
+  );
+});
+
 test("a missing or invalid --capabilities file produces a clear note, not a crash", () => {
   const dir = tmpDir();
   copyStarterTo("commerce-category-listing", dir);

@@ -178,8 +178,13 @@ heps inspect summer-sale --capabilities heps-capabilities.json
 - `UNKNOWN_MODULE_FIELD` — a composition slot sets a field its module doesn't define, with a "did you mean" suggestion for a close typo.
 - `UNKNOWN_OUTLET` — a layout places an Outlet the catalog's `outlets` section doesn't list for any of that layout's declared surfaces. Only runs if the catalog has an `outlets` section for that surface at all.
 - `UNKNOWN_PRESENTATION_VALUE` — a template sets a `presentation` key the catalog's `presentation` section documents with a `values` enum, to a value outside that enum. A key the catalog doesn't mention is never flagged — Presentation stays an open vocabulary, same as Theme Tokens.
+- `SLOT_NOT_ALLOWED_BY_MODULE` — a module's own `allowedSlots` (MODULE-01) doesn't list the slot a composition actually placed it in.
 
-Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, none of these four warnings.
+Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, none of these five warnings.
+
+One more warning needs no `--capabilities` at all, since it's a fact about the package's own files, not the catalog's:
+
+- `MODULE_NOT_ACCEPTED_BY_SLOT` — a Slot declares its own `accepts` list (MODULE-01) and the composition's actual module isn't in it.
 
 ---
 
@@ -199,14 +204,15 @@ can never drift further from the code than this document lets it.
 
 [`docs/contracts/layout-contract.md`](./docs/contracts/layout-contract.md) —
 the detailed split-out of the Layout chapter: Region/Slot/Outlet Node,
-the Outlet Binding Rule, Region Identity, and the Surface Outlet
-Registry's ownership boundary.
+the Outlet Binding Rule, the Slot Placement Rule, Region Identity, and
+the Surface Outlet Registry's ownership boundary.
 
 [`docs/contracts/composition-contract.md`](./docs/contracts/composition-contract.md) —
 the detailed split-out of the Composition chapter: Slot binding rules,
 what a module actually is (HUB-owned, not part of this format), and
-MODULE-01, the open question of whether `allowedSlots` belongs to the
-module or the layout.
+MODULE-01 (ratified): a Slot's own `accepts` and a module's own
+`allowedSlots` are independent restrictions, checked separately by
+`heps inspect`, neither one the other's fallback.
 
 [`docs/contracts/theme-contract.md`](./docs/contracts/theme-contract.md) —
 the open token namespace, the dot-path → CSS-variable rule, and why
@@ -243,8 +249,10 @@ Documented deliberately, not silently deferred — full detail in
   `presentation` still has no populated example anywhere in this repo —
   the checking mechanism is real and tested, the real values an agency
   would look up in it are not published yet.
-- Whether `allowedSlots` belongs to the module or the layout is an open
-  question; nothing here checks a composition's slot choice against it.
+- MODULE-01 is ratified and checked (`MODULE_NOT_ACCEPTED_BY_SLOT`,
+  `SLOT_NOT_ALLOWED_BY_MODULE`), but no public catalog demonstrates the
+  Slot side (`accepts`) populated on a real, shipped starter yet — only
+  in golden tests constructed for the purpose.
 - The Design Surface Registry covers the `category-listing` surface
   only.
 - No local runtime preview (`heps dev`) — inspecting and validating a

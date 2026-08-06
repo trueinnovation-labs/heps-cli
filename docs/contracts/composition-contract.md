@@ -88,35 +88,68 @@ format rejects an unrecognized field on its own. There is nothing
 holds only as far as a catalog you were handed is accurate, current, and
 complete.
 
-## Part 3 — Open question: who owns `allowedSlots`? (MODULE-01)
+## Part 3 — Who owns Slot placement? (MODULE-01, ratified)
 
-Not resolved by this document. Stated plainly because it's real, found
-independently three separate times (a Golden Test run, a governance
-review, and building Module Discovery itself), not because there's an
-answer here yet:
+Previously an open question, found independently three separate times (a
+Golden Test run, a governance review, and building Module Discovery
+itself). Ratified now, deliberately as a small, additive, non-breaking
+format change — not a renderer or schema overhaul.
 
-**The question:** should "which Slot ids a given `moduleKind` is allowed
-to occupy" be declared by the *module* (its own manifest names a list of
-permitted slots) or by the *layout* (each Slot Node names which module
-kinds it accepts)? One real reference HUB's module system takes the
-first approach today. Magnolia's component/container model is closer to
-the second — the container decides what's allowed inside it, not the
-component declaring where it's willing to go.
+**The decision:** the Slot owns the placement decision. A Slot Node may
+optionally declare `accepts` — a closed list of `moduleKind`s it's
+willing to host:
 
-**Why it isn't academic:** a real, verified mismatch exists today.
-`category-promo-banner`'s own `allowedSlots` list doesn't include
-`category.intro` — the exact slot id the Golden Starter's own
-Composition uses it in. Nothing in Part 1's guarantees catches this:
-`SLOT_NOT_IN_COMPOSITION` only checks that the slot `id` matches between
-Layout and Composition, never whether the chosen module was ever meant
-to go there. The Golden Starter installs and renders correctly anyway —
-which either means `allowedSlots` isn't actually enforced at install
-time either, or that this specific combination happens not to be
-checked yet. Both are worth knowing; neither is fixed here.
+```yaml
+- slot: category.featured
+  accepts:
+    - hot-sellers
+    - category-promo-banner
+```
 
-**What this document is not doing:** picking a side, adding a check, or
-changing `allowedSlots` anywhere. That's future work, with its own audit
-— not a conclusion this contract reaches by writing the question down.
+Omitted (the default — every package written before this field existed,
+including the Golden Starter): the Slot accepts any module, exactly the
+permissive behavior that already existed. This is additive, never a
+breaking change to an existing package.
+
+A module's own `allowedSlots` (Runtime Capability Catalog, HUB-owned —
+see [`runtime-capabilities/`](./runtime-capabilities/)) is kept as a
+**separate, independent restriction from the module's side**, not
+replaced by `accepts`. Neither list is authoritative over the other — a
+real placement must satisfy whichever of the two actually declares an
+opinion. This is the "intersection" model: the container (Slot) decides
+what it's willing to host, the component (module) may separately narrow
+where it's willing to go, and a real HUB checks both at install time.
+
+**Checked by `heps inspect`, not `heps check`.** Both halves of the
+intersection are advisory only, the same posture as every other
+catalog-driven warning:
+
+- `MODULE_NOT_ACCEPTED_BY_SLOT` — the Slot declares `accepts` and the
+  Composition's actual `moduleKind` for that slot isn't in it. Needs no
+  `--capabilities` catalog — this is a fact about the package's own
+  Layout and Composition, nothing HUB-owned.
+- `SLOT_NOT_ALLOWED_BY_MODULE` — a supplied catalog's
+  `modules.<kind>.allowedSlots` doesn't include the slot id the module
+  was actually placed in. Needs `--capabilities` — this is the catalog's
+  own `allowedSlots` field, documented since the Runtime Capability
+  Catalog existed but never cross-checked until now.
+
+Neither ever blocks `heps check` or `heps build`. Whether a real HUB
+enforces either side at install time is, as always, a fact about that
+HUB, not something this format can guarantee — see
+[`layout-contract.md`](./layout-contract.md#not-guaranteed).
+
+**The real mismatch this closes:** `category-promo-banner`'s own
+`allowedSlots` list didn't include `category.intro` — the exact slot the
+Golden Starter's own Composition places it in, working correctly the
+entire time. Building the check surfaced a second, identical case in the
+same pass: the Multiple Slots Golden Test's own `category.editorial`
+(see [`capabilities.md`](../capabilities.md)) wasn't listed either.
+Neither was ever a bug in the package that used it; both were gaps in
+`category-listing.example.json`'s own `allowedSlots` list, now corrected
+to include both — exactly the cases `SLOT_NOT_ALLOWED_BY_MODULE` would
+have caught, closed the same day the check was built, not swept under a
+silent, uncommented fix beforehand.
 
 ## Example
 

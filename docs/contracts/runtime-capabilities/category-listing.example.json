@@ -4,6 +4,8 @@
     "category-promo-banner": {
       "surfaces": ["category"],
       "allowedSlots": [
+        "category.intro",
+        "category.editorial",
         "category.promo-banner",
         "category.hero",
         "category.editorial-feature",

@@ -118,6 +118,16 @@ Outlet binding are two separate, mutually exclusive checks. A
 `Composition.slots[]` entry with the same name as an Outlet doesn't fill
 it; the two mechanisms never fall back on each other.
 
+**The Slot Placement Rule (MODULE-01, ratified)** — a Slot Node may
+optionally carry `accepts`, a closed list of `moduleKind`s it's willing
+to host. Omitted, the default: the Slot accepts any module, unchanged
+from every package written before this field existed. See
+[`composition-contract.md`, Part 3](./composition-contract.md#part-3--who-owns-slot-placement-module-01-ratified)
+for the full intersection model (Slot's `accepts` + Module's own
+`allowedSlots`, checked independently) and the two advisory `heps
+inspect` warnings it enables.
+Source: `HepsLayoutSlotChild.accepts` (type, `src/sdk/types.ts`)
+
 ## Flexible
 
 - **Recursion.** A Region Node may contain another Region Node, to any
@@ -153,12 +163,13 @@ it; the two mechanisms never fall back on each other.
   names exist per Surface at all — entirely HUB-owned, and not something
   a package can add to. See [`docs/design-contract.md`](../design-contract.md)
   for how this shows up as `heps check`'s honest boundary.
-- **Whether a Slot's allowed placement (which slot ids a given `moduleKind`
-  may occupy) belongs to the module or to the layout.** Both are real,
-  currently-live mechanisms in different places, and which one should own
-  this decision long-term is an open, tracked question — see
-  [`docs/contracts/runtime-capabilities/README.md`](./runtime-capabilities/README.md).
-  Not resolved by this document.
+- **Whether a real HUB actually enforces Slot placement (`accepts` /
+  `allowedSlots`) at install time.** MODULE-01 is resolved at the format
+  level (see the Slot Placement Rule above) — both `heps inspect`
+  warnings are advisory only. Whether any specific HUB additionally
+  blocks an install over a violation is, like everything else in this
+  section, a fact about that HUB, not something this format can
+  guarantee.
 - **That every visually distinct area of a page needs to be its own
   separate Outlet.** A single Outlet can legitimately stand for an
   opaque, multi-part area (e.g. one outlet covering filters, a count, and

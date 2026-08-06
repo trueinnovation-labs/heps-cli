@@ -65,13 +65,14 @@ never assumed, never rediscovered per project.
   warning, advisory only. `heps check` never reads this file.
 - **`values`** (optional) — known enum values, shown for reference; not
   currently cross-checked.
-- **`allowedSlots`** / **`surfaces`** — shown in `heps inspect`'s report
-  for context; not currently cross-checked against a composition's
-  actual slot ids. See
-  [`../composition-contract.md`](../composition-contract.md#part-3--open-question-who-owns-allowedslots-module-01)
-  (MODULE-01) for why — this isn't an oversight to fix later so much as
-  an open question about whether that check even belongs to the module
-  or the layout.
+- **`allowedSlots`** — cross-checked by `heps inspect` against a
+  composition's actual slot placement (`SLOT_NOT_ALLOWED_BY_MODULE`,
+  advisory only, needs `--capabilities`). One independent half of the
+  MODULE-01 intersection model — see
+  [`../composition-contract.md`, Part 3](../composition-contract.md#part-3--who-owns-slot-placement-module-01-ratified)
+  for the other half (the Slot's own `accepts`) and how the two relate.
+- **`surfaces`** — not currently cross-checked against anything; shown
+  for reference only.
 
 ### `outlets` — new
 

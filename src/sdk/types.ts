@@ -33,9 +33,21 @@ export type HepsLayoutReference = {
 
 export type HepsLayoutArrangement = "stack" | "columns";
 
+/**
+ * MODULE-01 (docs/contracts/composition-contract.md §3, ratified) — `accepts`
+ * is the Slot's own, optional, closed list of moduleKinds it's willing to
+ * host. Omitted (the default, and the only shape every package before this
+ * had): the Slot accepts any module, unchanged from before this field
+ * existed — this is additive, never a breaking change to an existing
+ * package. A Module's own `allowedSlots` (Runtime Capability Catalog,
+ * HUB-owned) is a separate, independent restriction from the module's side
+ * — neither list is authoritative over the other; a real placement must
+ * satisfy whichever of the two actually declares an opinion.
+ */
 export type HepsLayoutSlotChild = {
   slot: string;
   size?: number;
+  accepts?: readonly string[];
 };
 
 /**

@@ -30,10 +30,10 @@ It is **not**:
   "Where this comes from" below)
 - new validator logic — every rule below already runs today, in
   `heps check`
-- a public module registry, or a resolution of who should own
-  slot-placement rules — real, still-open gaps, written down honestly
-  (not resolved) in the Composition & Module Contract's MODULE-01
-  section
+- a public module registry — a real, still-open gap. Who owns
+  slot-placement rules (MODULE-01) is resolved as of the Composition &
+  Module Contract's own §3: the Slot's own `accepts`, the module's own
+  `allowedSlots`, checked independently, neither the other's fallback
 - a substitute for reading `starters/commerce-category-listing` yourself —
   it's the worked example every chapter below points back to
 
@@ -199,8 +199,9 @@ the layout (open, tracked, not resolved here).
 [`docs/contracts/composition-contract.md`](./contracts/composition-contract.md) —
 the Composition/Slot rules below in full, plus what a **module**
 actually is (HUB-owned capability, not part of this format at all), the
-Runtime Capability Catalog, and MODULE-01, the open question of whether
-`allowedSlots` belongs to the module or the layout.
+Runtime Capability Catalog, and MODULE-01, ratified: the Slot's own
+`accepts` and the module's own `allowedSlots` are checked independently,
+neither one the other's fallback.
 
 **Ownership:** yours. A Composition fills the Slots a Layout declares —
 never the Outlets.
@@ -215,9 +216,9 @@ scoped to one entity.
 
 **Not guaranteed:** whether a `moduleKind` is registered on the target
 HUB and which fields it accepts (checked only with HUB context, at
-install time); whether the module you chose was ever meant to occupy
-that particular slot at all — this format checks that the slot `id`
-matches, never that the module belongs there (MODULE-01, unresolved).
+install time); whether a real HUB actually enforces Slot placement
+(`accepts`/`allowedSlots`) at install time — `heps inspect` can warn on
+either side (MODULE-01), advisory only, never blocking.
 
 **Example:** [`starters/commerce-category-listing/compositions/category/default.yaml`](../starters/commerce-category-listing/compositions/category/default.yaml)
 
