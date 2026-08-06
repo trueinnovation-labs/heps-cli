@@ -147,6 +147,10 @@ function printReport(
 
   const warningLines: string[] = [];
 
+  // MODULE-01: the Slot half of the intersection — a fact about this
+  // package's own Layout + Composition, needs no --capabilities catalog.
+  warningLines.push(...buildSlotAcceptsWarnings(pkg));
+
   if (capabilities) {
     const usedByModuleKind = new Map<string, string[]>();
     for (const comp of pkg.compositions) {
@@ -193,6 +197,9 @@ function printReport(
 
     warningLines.push(...buildOutletWarnings(pkg, capabilities));
     warningLines.push(...buildPresentationWarnings(pkg, capabilities));
+    // MODULE-01: the Module half of the intersection — needs the catalog's
+    // own allowedSlots, independent of whatever the Slot itself declares.
+    warningLines.push(...buildModuleAllowedSlotsWarnings(pkg, capabilities));
   }
 
   for (const theme of pkg.themes) {
@@ -559,6 +566,67 @@ function buildPresentationWarnings(pkg: LoadedHepsPackageV2, capabilities: Runti
   return warnings;
 }
 
+// ── MODULE-01 Slot Placement cross-check (composition-contract.md, Part 3) ──
+//
+// Two independent halves of the intersection model — neither is the other's
+// fallback, both advisory only:
+//   - buildSlotAcceptsWarnings   — the Slot's own `accepts`, format-only,
+//     needs no catalog, runs unconditionally.
+//   - buildModuleAllowedSlotsWarnings — the catalog's `modules.*.allowedSlots`,
+//     needs --capabilities, independent of whatever the Slot declares.
+
+/** slot id -> its own `accepts` list (undefined if the Slot never declared one). */
+function collectSlotAccepts(region: HepsLayoutRegionNode | undefined): Map<string, readonly string[] | undefined> {
+  const map = new Map<string, readonly string[] | undefined>();
+  if (!region) return map;
+
+  for (const child of region.children ?? []) {
+    if ("slot" in child) {
+      map.set(child.slot, child.accepts);
+    } else if ("region" in child) {
+      for (const [slotId, accepts] of collectSlotAccepts(child.region)) map.set(slotId, accepts);
+    }
+  }
+  return map;
+}
+
+function buildSlotAcceptsWarnings(pkg: LoadedHepsPackageV2): string[] {
+  const warnings: string[] = [];
+
+  for (const layout of pkg.layouts) {
+    const slotAccepts = collectSlotAccepts(layout.root);
+
+    for (const comp of pkg.compositions) {
+      for (const slot of comp.slots) {
+        const accepts = slotAccepts.get(slot.id);
+        if (accepts === undefined) continue;
+        if (!accepts.includes(slot.moduleKind)) {
+          warnings.push(`  MODULE_NOT_ACCEPTED_BY_SLOT  Slot "${slot.id}" accepts [${accepts.join(", ")}], but this composition places "${slot.moduleKind}" there.`);
+        }
+      }
+    }
+  }
+
+  return warnings;
+}
+
+function buildModuleAllowedSlotsWarnings(pkg: LoadedHepsPackageV2, capabilities: RuntimeCapabilityCatalog): string[] {
+  const warnings: string[] = [];
+
+  for (const comp of pkg.compositions) {
+    for (const slot of comp.slots) {
+      const module = capabilities.modules[slot.moduleKind];
+      const allowedSlots = module?.allowedSlots;
+      if (!allowedSlots) continue;
+      if (!allowedSlots.includes(slot.id)) {
+        warnings.push(`  SLOT_NOT_ALLOWED_BY_MODULE  Module "${slot.moduleKind}" lists allowedSlots [${allowedSlots.join(", ")}], but this composition places it in slot "${slot.id}".`);
+      }
+    }
+  }
+
+  return warnings;
+}
+
 function stem(filePath: string): string {
   return filePath.replace(/\.ya?ml$/, "");
 }
@@ -606,6 +674,12 @@ docs/design-contract.md):
                                 "presentation" section) a template sets a
                                 cataloged presentation key to a value
                                 that key's catalog entry doesn't list
+  MODULE_NOT_ACCEPTED_BY_SLOT    a Slot declares "accepts" and the
+                                composition's actual module isn't in it —
+                                needs no --capabilities, format-only
+  SLOT_NOT_ALLOWED_BY_MODULE     (needs --capabilities) a module's own
+                                allowedSlots doesn't list the slot it was
+                                actually placed in
 
 This never validates the package (see "heps check" for that) and never
 contacts a HUB.
