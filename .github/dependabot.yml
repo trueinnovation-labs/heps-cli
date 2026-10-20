@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  # npm — the root package-lock.json is this repo's only lockfile.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Patch/minor updates land as one combined PR. Majors are excluded
+      # from the group so each surfaces as its own, separately reviewable
+      # PR — npm major updates require explicit review.
+      npm-patch-and-minor:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+    # @types/node must track the Node major CI runs on (22), not the latest
+    # Node release — newer types let Node 23+ APIs type-check that do not
+    # exist at runtime on Node 22. Same rule as the HUB repo; lift it when
+    # the Node baseline is deliberately changed.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions — keeps .github/workflows/ci.yml's pinned major tags
+  # current, through the same PR + CI review path as npm updates.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

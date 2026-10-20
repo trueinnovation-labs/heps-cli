@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Same Node major as the HUB (edge-delivery-commerce-hub), which
+      # consumes the Runtime Capability Catalog this CLI validates against.
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `npm test` runs `npm run build` (clean + tsc) first, then the
+      # node:test golden suites under tests/ — one step covers both.
+      - name: Build and test
+        run: npm test
+
+      # Fails on any high/critical advisory in shipped (non-dev)
+      # dependencies — what users of @heps/cli actually install.
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
