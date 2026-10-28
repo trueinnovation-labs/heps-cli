@@ -1,12 +1,28 @@
 version: 2
 
+# DEP-AUTO-01 (PO 2026-10-28) — same lightweight process as the HUB repo:
+# routine version updates monthly and grouped, security fixes immediately
+# (schedule, cooldown and open-pull-requests-limit apply to version updates
+# only — see
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference),
+# majors one at a time after an explicit compatibility review. No auto-merge:
+# every merge needs explicit Product Owner approval. This repo is versioned
+# and tested on its own — no automatic SDK alignment with the HUB.
+
 updates:
   # npm — the root package-lock.json is this repo's only lockfile.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    # Version-update PRs only; security PRs have GitHub's separate, fixed
+    # limit of 10. Target: at most 2–3 open routine PRs per ecosystem.
+    open-pull-requests-limit: 3
+    # A new release is proposed only after it has been public for 7 days
+    # (14 for majors). Never delays security updates.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     groups:
       # Patch/minor updates land as one combined PR. Majors are excluded
       # from the group so each surfaces as its own, separately reviewable
@@ -16,12 +32,36 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    # @types/node must track the Node major CI runs on (22), not the latest
-    # Node release — newer types let Node 23+ APIs type-check that do not
-    # exist at runtime on Node 22. Same rule as the HUB repo; lift it when
-    # the Node baseline is deliberately changed.
+      # Compatible (patch/minor) security fixes in one PR. Grouping is not a
+      # review: each fix is still checked individually. Takes effect only
+      # while Dependabot security updates are enabled for this repo
+      # (Dependabot alerts were enabled 2026-10-28; automated security
+      # updates are a separate setting and stay as they are until the PO
+      # decides).
+      npm-security-patch-and-minor:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore rules apply to version AND security updates (GitHub docs), so
+    # each one is scoped to semver-major of exactly one package — never a
+    # blanket major ignore, never used to silence an alert.
     ignore:
+      # @types/node must track the Node major CI runs on (22), not the latest
+      # Node release — newer types let Node 23+ APIs type-check that do not
+      # exist at runtime on Node 22. Same rule as the HUB repo; lift it when
+      # the Node baseline is deliberately changed.
       - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # DEP-AUTO-01 — js-yaml 5 is explicitly deferred: its module shape
+      # breaks `import yaml from "js-yaml"` in src/sdk/read/readHepsPackageV2.ts,
+      # the same code as the HUB's packages/heps-core copy. The fix belongs
+      # to the HEPS v2 audit (DEP-02), which first decides the canonical SDK
+      # copy (HUB docs/roadmap/technical-debt.md, HUB-DEPENDABOT-CLOSURE-01).
+      # Remove this rule when that audit takes the change.
+      - dependency-name: "js-yaml"
         update-types: ["version-update:semver-major"]
 
   # GitHub Actions — keeps .github/workflows/ci.yml's pinned major tags
@@ -29,5 +69,17 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    cooldown:
+      default-days: 7
+    groups:
+      # Patch/minor only — action majors (the usual case with major-tag
+      # pinning) stay separate PRs, like every other major.
+      actions:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
