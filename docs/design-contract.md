@@ -136,6 +136,13 @@ Theme, which Composition(s).
 - `presentation` — an opaque, per-`entityKey` config map heps-core
   reads and passes through without interpreting.
   Source: `HepsPresentationMap` (type)
+- `presentationOptions` — the settings of `presentation` (dot-paths such
+  as `productGrid.columns`) that the HUB's Studio may let a merchandiser
+  change per page: `{ values, default }` each. A setting not listed is
+  not editable. `heps check` verifies the structure (values listed,
+  default and the template's own `presentation` among them); which
+  settings and values a HUB can apply is checked by that HUB at install.
+  Source: `HepsPresentationOption` (type), `INVALID_PRESENTATION_OPTION`
 
 **Not guaranteed:**
 

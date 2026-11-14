@@ -35,6 +35,8 @@ export type {
   HepsCompositionSlot,
   HepsCompositionV2,
   HepsTemplateV2,
+  HepsPresentationOption,
+  HepsPresentationOptions,
   // Package manifest
   HepsPackageV2Metadata,
   HepsPackageV2Requires,

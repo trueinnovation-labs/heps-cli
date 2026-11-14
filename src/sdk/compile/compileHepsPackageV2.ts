@@ -179,7 +179,7 @@ function deriveTemplates(
   );
   const resolveLayoutName = (name: string): string => layoutIdByAuthoredId.get(name) ?? name;
 
-  return templates.map(({ surface, layout, theme, composition, compositions: refs, presentation }) => ({
+  return templates.map(({ surface, layout, theme, composition, compositions: refs, presentation, presentationOptions }) => ({
     surface,
     layout: { ...layout, name: resolveLayoutName(layout.name) },
     theme,
@@ -192,6 +192,8 @@ function deriveTemplates(
     // VELA-PKG-1B — opaque passthrough, same as HepsCompositionSlot.fields:
     // no entityKey resolution needed, presentation values aren't references.
     ...(presentation !== undefined && { presentation }),
+    // RECOVERY-02 — same opaque passthrough (values are not references).
+    ...(presentationOptions !== undefined && { presentationOptions }),
   }));
 }
 

@@ -39,6 +39,16 @@ export type ValidationContext = {
    * Absent = the dataset is unknown; only the offline rules apply.
    */
   categoryPaths?: ReadonlySet<string>;
+  /**
+   * STUDIO-COMMERCE-PRODUCT-DISCOVERY-RECOVERY-02 (#313) — template surface
+   * -> the presentation settings the HUB runtime can apply there and the
+   * values each accepts (the HUB's capability declaration; same pattern as
+   * presentationFields). When present, a template's presentationOptions may
+   * only release a listed setting with listed values. Absent = runtime
+   * unknown; only the structural rules apply (non-empty values, default
+   * among them, the template's own presentation values among them).
+   */
+  templatePresentationOptions?: ReadonlyMap<string, readonly { field: string; values: readonly string[] }[]>;
   knownModuleKinds?: Set<string>;
   /** HUB-supplied: built-in layout names that Surface `layout.provider: "hub"` may reference without shipping a Layout Definition. Omitted (e.g. a bare local `heps check`) → this check is skipped, not failed. */
   knownHubLayouts?: ReadonlySet<string>;
@@ -48,6 +58,11 @@ export type ValidationContext = {
 
 /** ST-M3-IDENTITY-IMPL-01 (PO D-3) — a category url_path: lowercase segments joined by "/". */
 const CATEGORY_PATH_PATTERN = /^[a-z0-9][a-z0-9_-]*(?:\/[a-z0-9][a-z0-9_-]*)*$/;
+
+/** RECOVERY-02 — reads a dot-path ("productGrid.columns") out of a template's presentation config. */
+function readPresentationPath(config: Record<string, unknown> | undefined, dotPath: string): unknown {
+  return dotPath.split(".").reduce<unknown>((value, part) => (value && typeof value === "object" ? (value as Record<string, unknown>)[part] : undefined), config);
+}
 
 export function validateHepsPackageV2(
   pkg: LoadedHepsPackageV2,
@@ -334,6 +349,49 @@ export function validateHepsPackageV2(
             `Template compositions["${key}"] is not a category path of the target commerce dataset — a leaf or route key is not a binding.`,
             `Bind the category by its full url_path as the dataset defines it.`,
           );
+        }
+      }
+    }
+
+    // RECOVERY-02 (#313) — the settings a template releases for Studio.
+    if (template.presentationOptions != null) {
+      const supported = context.templatePresentationOptions?.get(template.surface);
+      for (const [field, option] of Object.entries(template.presentationOptions)) {
+        const values = Array.isArray(option?.values) ? option.values.map(String) : [];
+        if (values.length === 0) {
+          push("error", "INVALID_PRESENTATION_OPTION", fp,
+            `presentationOptions["${field}"] declares no values — list the values Studio may offer.`,
+          );
+          continue;
+        }
+        if (option.default === undefined || !values.includes(String(option.default))) {
+          push("error", "INVALID_PRESENTATION_OPTION", fp,
+            `presentationOptions["${field}"] default "${String(option.default)}" is not one of its values: ${values.join(", ")}.`,
+          );
+        }
+        if (context.templatePresentationOptions) {
+          const runtime = supported?.find((s) => s.field === field);
+          if (!runtime) {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentationOptions["${field}"] is not a setting the HUB applies on surface "${template.surface}".`,
+              supported?.length ? `Supported settings: ${supported.map((s) => s.field).join(", ")}.` : undefined,
+            );
+          } else {
+            const unsupported = values.filter((v) => !runtime.values.includes(v));
+            if (unsupported.length) {
+              push("error", "INVALID_PRESENTATION_OPTION", fp,
+                `presentationOptions["${field}"] lists values the HUB cannot apply: ${unsupported.join(", ")} — supported: ${runtime.values.join(", ")}.`,
+              );
+            }
+          }
+        }
+        for (const [entityKey, config] of Object.entries(template.presentation ?? {})) {
+          const value = readPresentationPath(config as Record<string, unknown>, field);
+          if (value !== undefined && !values.includes(String(value))) {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentation["${entityKey}"].${field} is "${String(value)}", which presentationOptions["${field}"] does not permit (${values.join(", ")}).`,
+            );
+          }
         }
       }
     }
