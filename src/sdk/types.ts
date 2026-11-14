@@ -144,6 +144,23 @@ export type HepsCompositionV2 = {
  */
 export type HepsPresentationMap = Readonly<Record<string, Record<string, unknown>>>;
 
+/**
+ * STUDIO-COMMERCE-PRODUCT-DISCOVERY-RECOVERY-02 (#313, PO Option A) — one
+ * presentation setting a template releases for editing in Studio: the
+ * permitted values and the package default. Same shape as the module
+ * presentation contract (M70.2A `{field, options, default}`), keyed by the
+ * setting's dot-path inside the template's `presentation` (e.g.
+ * "productGrid.columns"). A setting the template does not list is not
+ * editable. Which settings exist and which values they accept is a fact of
+ * the HUB runtime, checked through ValidationContext.templatePresentationOptions.
+ */
+export type HepsPresentationOption = {
+  values:  readonly (string | number | boolean)[];
+  default: string | number | boolean;
+};
+
+export type HepsPresentationOptions = Readonly<Record<string, HepsPresentationOption>>;
+
 export type HepsTemplateV2 = {
   surface: string;
   layout: HepsLayoutReference;
@@ -151,6 +168,8 @@ export type HepsTemplateV2 = {
   composition?: string;
   compositions?: Readonly<Record<string, string>>;
   presentation?: HepsPresentationMap;
+  /** RECOVERY-02 — the presentation settings Studio may edit, see HepsPresentationOption. */
+  presentationOptions?: HepsPresentationOptions;
 };
 
 // ── Package Manifest ──────────────────────────────────────────────────────────
@@ -271,7 +290,9 @@ export type HepsValidationCode =
   // path (url_path), the same path as the bound composition's entityKey.
   | "INVALID_CATEGORY_BINDING"
   | "CATEGORY_BINDING_MISMATCH"
-  | "CATEGORY_BINDING_UNRESOLVED";
+  | "CATEGORY_BINDING_UNRESOLVED"
+  // RECOVERY-02 (#313) — a template's presentationOptions (Studio-editable settings).
+  | "INVALID_PRESENTATION_OPTION";
 
 export type HepsValidationIssue = {
   severity: HepsValidationSeverity;
@@ -344,6 +365,8 @@ export type HepsCompiledTemplate = {
   compositions?: Readonly<Record<string, string>>;
   /** VELA-PKG-1B — passthrough of HepsTemplateV2.presentation, see HepsPresentationMap. */
   presentation?: HepsPresentationMap;
+  /** RECOVERY-02 — passthrough of HepsTemplateV2.presentationOptions. */
+  presentationOptions?: HepsPresentationOptions;
 };
 
 /**
