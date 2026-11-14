@@ -266,7 +266,12 @@ export type HepsValidationCode =
   | "PATH_TRAVERSAL"
   | "MISSING_REQUIRED_FIELD"
   | "UNKNOWN_CONTRIBUTION"
-  | "INCONSISTENT_ENTITY_KEY";
+  | "INCONSISTENT_ENTITY_KEY"
+  // ST-M3-IDENTITY-IMPL-01 (PO D-3) — category bindings use the full category
+  // path (url_path), the same path as the bound composition's entityKey.
+  | "INVALID_CATEGORY_BINDING"
+  | "CATEGORY_BINDING_MISMATCH"
+  | "CATEGORY_BINDING_UNRESOLVED";
 
 export type HepsValidationIssue = {
   severity: HepsValidationSeverity;

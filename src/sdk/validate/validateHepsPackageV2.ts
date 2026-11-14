@@ -30,12 +30,24 @@ const PACKAGE_ID_RE = /^[a-z0-9][-a-z0-9.]*[a-z0-9]$/;
 const DISALLOWED_CSS_RE = /^\s*(body|html|\*|:root|\[class\]|\[id\])\s*[{,]/m;
 
 export type ValidationContext = {
+  /**
+   * ST-M3-IDENTITY-IMPL-01 (PO D-3) — the category paths (url_path) of the
+   * commerce dataset the package is checked against: the HUB's live category
+   * index at install/refresh, or a category identity snapshot for `heps check
+   * --categories`. When present, every category binding must be one of them
+   * (CATEGORY_BINDING_UNRESOLVED) — a leaf or route key is never a binding.
+   * Absent = the dataset is unknown; only the offline rules apply.
+   */
+  categoryPaths?: ReadonlySet<string>;
   knownModuleKinds?: Set<string>;
   /** HUB-supplied: built-in layout names that Surface `layout.provider: "hub"` may reference without shipping a Layout Definition. Omitted (e.g. a bare local `heps check`) → this check is skipped, not failed. */
   knownHubLayouts?: ReadonlySet<string>;
   /** HUB-supplied: which Outlet names a given Surface actually provides. Omitted (e.g. a bare local `heps check`) → Outlet names are checked for well-formedness only, not against a real registry. */
   surfaceOutletRegistry?: Readonly<Record<string, readonly string[]>>;
 };
+
+/** ST-M3-IDENTITY-IMPL-01 (PO D-3) — a category url_path: lowercase segments joined by "/". */
+const CATEGORY_PATH_PATTERN = /^[a-z0-9][a-z0-9_-]*(?:\/[a-z0-9][a-z0-9_-]*)*$/;
 
 export function validateHepsPackageV2(
   pkg: LoadedHepsPackageV2,
@@ -297,6 +309,33 @@ export function validateHepsPackageV2(
       push("error", "MISSING_COMPOSITION", fp,
         `Template references composition "${template.composition}" but compositions/${template.composition}.yaml was not found.`,
       );
+    }
+
+    // ST-M3-IDENTITY-IMPL-01 (PO D-3) — a category template binds each
+    // category by its full path, the same path as the bound composition's
+    // entityKey; a leaf/route key or a non-category key ("default") is not a
+    // binding. Against a known dataset, the path must exist.
+    if (template.surface === "category" && template.compositions != null) {
+      for (const [key, ref] of Object.entries(template.compositions)) {
+        if (!CATEGORY_PATH_PATTERN.test(key)) {
+          push("error", "INVALID_CATEGORY_BINDING", fp,
+            `Template compositions["${key}"] is not a category path — bind a category by its full url_path (e.g. "women/tops-women").`,
+          );
+        }
+        const boundEntityKey = compositionByStem.get(ref)?.entityKey;
+        if (compositionByStem.has(ref) && boundEntityKey !== key) {
+          push("error", "CATEGORY_BINDING_MISMATCH", fp,
+            `Template compositions["${key}"] binds composition "${ref}" whose entityKey is "${boundEntityKey ?? "(absent)"}" — the binding key and the composition's entityKey must be the same full category path.`,
+            `Use the full category path as both the binding key and the composition's entityKey.`,
+          );
+        }
+        if (context.categoryPaths && !context.categoryPaths.has(key)) {
+          push("error", "CATEGORY_BINDING_UNRESOLVED", fp,
+            `Template compositions["${key}"] is not a category path of the target commerce dataset — a leaf or route key is not a binding.`,
+            `Bind the category by its full url_path as the dataset defines it.`,
+          );
+        }
+      }
     }
 
     if (template.compositions != null) {
