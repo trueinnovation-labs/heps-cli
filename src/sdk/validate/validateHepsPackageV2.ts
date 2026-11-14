@@ -34,8 +34,9 @@ export type ValidationContext = {
    * ST-M3-IDENTITY-IMPL-01 (PO D-3) — the category paths (url_path) of the
    * commerce dataset the package is checked against: the HUB's live category
    * index at install/refresh, or a category identity snapshot for `heps check
-   * --categories`. When present, every category binding must be one of them
-   * (CATEGORY_BINDING_UNRESOLVED) — a leaf or route key is never a binding.
+   * --categories`. When present, a category binding that is not one of them
+   * is a warning (CATEGORY_BINDING_UNRESOLVED): the binding has no effect in
+   * that shop; the package still installs.
    * Absent = the dataset is unknown; only the offline rules apply.
    */
   categoryPaths?: ReadonlySet<string>;
@@ -345,9 +346,12 @@ export function validateHepsPackageV2(
           );
         }
         if (context.categoryPaths && !context.categoryPaths.has(key)) {
-          push("error", "CATEGORY_BINDING_UNRESOLVED", fp,
-            `Template compositions["${key}"] is not a category path of the target commerce dataset — a leaf or route key is not a binding.`,
-            `Bind the category by its full url_path as the dataset defines it.`,
+          // COMMERCE-SCOPE-01 (fault tolerance) — a category the shop does not
+          // have is reported, never a reason to refuse the package: that page
+          // keeps its standard look until the shop has the category.
+          push("warning", "CATEGORY_BINDING_UNRESOLVED", fp,
+            `The shop has no category "${key}". This template binding has no effect there; the page keeps its standard look.`,
+            `Check the category's full path in the shop (e.g. "women/tops-women"), or ignore this if the shop does not sell it.`,
           );
         }
       }

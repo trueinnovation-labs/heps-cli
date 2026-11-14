@@ -52,10 +52,10 @@ test("--categories: a binding that is a path of the dataset is READY", () => {
   assert.equal(run(["check", GOLDEN, "--categories", snapshot(["golden-leaf", "other"])]).status, 0);
 });
 
-test("--categories: a binding the dataset does not have (leaf-only) is BLOCKED", () => {
+test("--categories: a category the shop does not have is a warning, not a block (READY)", () => {
   const result = run(["check", GOLDEN, "--categories", snapshot(["women/golden-leaf"])]);
-  assert.equal(result.status, 1);
-  assert.match(result.out, /CATEGORY_BINDING_UNRESOLVED|not a category path of the target commerce dataset/);
+  assert.equal(result.status, 0);
+  assert.match(result.out, /The shop has no category "golden-leaf"/);
 });
 
 test("offline: a binding key that differs from the composition's entityKey is BLOCKED", () => {
