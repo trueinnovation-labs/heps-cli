@@ -145,6 +145,9 @@ Theme, which Composition(s).
   A list the merchandiser may curate per page (e.g. `facets.filters`:
   which of the shop's filters show and in which order) is released with
   `{ editable: true }` instead of values; its items come from the shop.
+  A release takes exactly these keys (`values` + `default`, or
+  `editable`). Offline, `heps check` verifies only this structure; whether
+  a setting is a list is checked by the HUB at install.
 - Category bindings use the category's full path in the shop (e.g.
   `women/tops-women`). A path the target shop does not have is a
   **warning**, never a refusal: the package installs, and that page keeps

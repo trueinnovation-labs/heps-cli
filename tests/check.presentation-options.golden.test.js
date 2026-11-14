@@ -59,3 +59,12 @@ test("an editable list with editable other than true is BLOCKED", () => {
   assert.equal(result.status, 1);
   assert.match(result.out, /INVALID_PRESENTATION_OPTION|editable must be true/);
 });
+
+test("a release says exactly one thing: unknown keys on a setting or a list are BLOCKED", () => {
+  const choice = run(["check", withTemplateTail("presentationOptions:\n  productGrid.columns:\n    values: [2, 3]\n    default: 3\n    kind: list\n")]);
+  assert.equal(choice.status, 1);
+  assert.match(choice.out, /unknown keys: kind/);
+  const list = run(["check", withTemplateTail("presentationOptions:\n  facets.filters:\n    editable: true\n    values: [a]\n")]);
+  assert.equal(list.status, 1);
+  assert.match(list.out, /takes no other keys: values/);
+});

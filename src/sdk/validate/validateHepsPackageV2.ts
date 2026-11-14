@@ -364,7 +364,16 @@ export function validateHepsPackageV2(
       for (const [field, released] of Object.entries(template.presentationOptions)) {
         const runtimeField = supported?.find((s) => s.field === field);
         // FUNCTIONAL-04 Slice 1 — a list Studio may curate: `{ editable: true }`, no values.
+        // Agent B (Slice 1 B1) — a release says exactly one thing: list or choice.
+        const extraKeys = (allowed: readonly string[]) =>
+          released != null && typeof released === "object" ? Object.keys(released).filter((k) => !allowed.includes(k)) : [];
         if (released != null && typeof released === "object" && "editable" in released) {
+          const extra = extraKeys(["editable"]);
+          if (extra.length) {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentationOptions["${field}"] is an editable list and takes no other keys: ${extra.join(", ")}.`,
+            );
+          }
           if ((released as { editable: unknown }).editable !== true) {
             push("error", "INVALID_PRESENTATION_OPTION", fp,
               `presentationOptions["${field}"].editable must be true — a list is released with { editable: true }.`,
@@ -382,6 +391,12 @@ export function validateHepsPackageV2(
             `presentationOptions["${field}"] is a list — release it with { editable: true } instead of values.`,
           );
           continue;
+        }
+        const unknownKeys = extraKeys(["values", "default"]);
+        if (unknownKeys.length) {
+          push("error", "INVALID_PRESENTATION_OPTION", fp,
+            `presentationOptions["${field}"] has unknown keys: ${unknownKeys.join(", ")} — a setting takes values and default, a list { editable: true }.`,
+          );
         }
         const option = released as HepsPresentationChoice;
         const values = Array.isArray(option?.values) ? option.values.map(String) : [];
