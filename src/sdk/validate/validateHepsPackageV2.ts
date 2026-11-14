@@ -23,6 +23,7 @@ import type {
   HepsValidationCode,
   HepsValidationIssue,
   HepsValidationResult,
+  HepsPresentationChoice,
 } from "../types.js";
 
 const SEMVER_RE = /^\d+\.\d+\.\d+/;
@@ -49,7 +50,7 @@ export type ValidationContext = {
    * unknown; only the structural rules apply (non-empty values, default
    * among them, the template's own presentation values among them).
    */
-  templatePresentationOptions?: ReadonlyMap<string, readonly { field: string; values: readonly string[] }[]>;
+  templatePresentationOptions?: ReadonlyMap<string, readonly { field: string; values: readonly string[]; kind?: "list" }[]>;
   knownModuleKinds?: Set<string>;
   /** HUB-supplied: built-in layout names that Surface `layout.provider: "hub"` may reference without shipping a Layout Definition. Omitted (e.g. a bare local `heps check`) → this check is skipped, not failed. */
   knownHubLayouts?: ReadonlySet<string>;
@@ -360,7 +361,44 @@ export function validateHepsPackageV2(
     // RECOVERY-02 (#313) — the settings a template releases for Studio.
     if (template.presentationOptions != null) {
       const supported = context.templatePresentationOptions?.get(template.surface);
-      for (const [field, option] of Object.entries(template.presentationOptions)) {
+      for (const [field, released] of Object.entries(template.presentationOptions)) {
+        const runtimeField = supported?.find((s) => s.field === field);
+        // FUNCTIONAL-04 Slice 1 — a list Studio may curate: `{ editable: true }`, no values.
+        // Agent B (Slice 1 B1) — a release says exactly one thing: list or choice.
+        const extraKeys = (allowed: readonly string[]) =>
+          released != null && typeof released === "object" ? Object.keys(released).filter((k) => !allowed.includes(k)) : [];
+        if (released != null && typeof released === "object" && "editable" in released) {
+          const extra = extraKeys(["editable"]);
+          if (extra.length) {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentationOptions["${field}"] is an editable list and takes no other keys: ${extra.join(", ")}.`,
+            );
+          }
+          if ((released as { editable: unknown }).editable !== true) {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentationOptions["${field}"].editable must be true — a list is released with { editable: true }.`,
+            );
+          } else if (context.templatePresentationOptions && runtimeField?.kind !== "list") {
+            push("error", "INVALID_PRESENTATION_OPTION", fp,
+              `presentationOptions["${field}"] is not a list the HUB lets Studio edit on surface "${template.surface}".`,
+              supported?.some((s) => s.kind === "list") ? `Editable lists: ${supported.filter((s) => s.kind === "list").map((s) => s.field).join(", ")}.` : undefined,
+            );
+          }
+          continue;
+        }
+        if (runtimeField?.kind === "list") {
+          push("error", "INVALID_PRESENTATION_OPTION", fp,
+            `presentationOptions["${field}"] is a list — release it with { editable: true } instead of values.`,
+          );
+          continue;
+        }
+        const unknownKeys = extraKeys(["values", "default"]);
+        if (unknownKeys.length) {
+          push("error", "INVALID_PRESENTATION_OPTION", fp,
+            `presentationOptions["${field}"] has unknown keys: ${unknownKeys.join(", ")} — a setting takes values and default, a list { editable: true }.`,
+          );
+        }
+        const option = released as HepsPresentationChoice;
         const values = Array.isArray(option?.values) ? option.values.map(String) : [];
         if (values.length === 0) {
           push("error", "INVALID_PRESENTATION_OPTION", fp,
@@ -374,7 +412,7 @@ export function validateHepsPackageV2(
           );
         }
         if (context.templatePresentationOptions) {
-          const runtime = supported?.find((s) => s.field === field);
+          const runtime = runtimeField;
           if (!runtime) {
             push("error", "INVALID_PRESENTATION_OPTION", fp,
               `presentationOptions["${field}"] is not a setting the HUB applies on surface "${template.surface}".`,

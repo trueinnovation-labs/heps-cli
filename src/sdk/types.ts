@@ -154,10 +154,22 @@ export type HepsPresentationMap = Readonly<Record<string, Record<string, unknown
  * editable. Which settings exist and which values they accept is a fact of
  * the HUB runtime, checked through ValidationContext.templatePresentationOptions.
  */
-export type HepsPresentationOption = {
+export type HepsPresentationChoice = {
   values:  readonly (string | number | boolean)[];
   default: string | number | boolean;
 };
+
+/**
+ * FUNCTIONAL-04 Slice 1 (PO 2026-11-14) — a list the template lets Studio
+ * curate per page, e.g. `facets.filters: { editable: true }`: which of the
+ * shop's filters show, and in which order. The list's items come from the
+ * commerce system at runtime, so the template declares no values; the
+ * package default is the commerce system's own list. Whether a field is a
+ * list is a fact of the HUB runtime (ValidationContext, `kind: "list"`).
+ */
+export type HepsPresentationListRelease = { editable: true };
+
+export type HepsPresentationOption = HepsPresentationChoice | HepsPresentationListRelease;
 
 export type HepsPresentationOptions = Readonly<Record<string, HepsPresentationOption>>;
 
