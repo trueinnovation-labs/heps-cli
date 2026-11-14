@@ -47,3 +47,15 @@ test("a setting without values is BLOCKED", () => {
   assert.equal(result.status, 1);
   assert.match(result.out, /INVALID_PRESENTATION_OPTION|declares no values/);
 });
+
+// FUNCTIONAL-04 Slice 1 — a list Studio may curate is released with { editable: true }.
+test("an editable list ({ editable: true }) is READY", () => {
+  const dir = withTemplateTail("presentationOptions:\n  facets.filters:\n    editable: true\n");
+  assert.equal(run(["check", dir]).status, 0);
+});
+
+test("an editable list with editable other than true is BLOCKED", () => {
+  const result = run(["check", withTemplateTail("presentationOptions:\n  facets.filters:\n    editable: yes-please\n")]);
+  assert.equal(result.status, 1);
+  assert.match(result.out, /INVALID_PRESENTATION_OPTION|editable must be true/);
+});

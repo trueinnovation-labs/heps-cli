@@ -142,6 +142,9 @@ Theme, which Composition(s).
   not editable. `heps check` verifies the structure (values listed,
   default and the template's own `presentation` among them); which
   settings and values a HUB can apply is checked by that HUB at install.
+  A list the merchandiser may curate per page (e.g. `facets.filters`:
+  which of the shop's filters show and in which order) is released with
+  `{ editable: true }` instead of values; its items come from the shop.
 - Category bindings use the category's full path in the shop (e.g.
   `women/tops-women`). A path the target shop does not have is a
   **warning**, never a refusal: the package installs, and that page keeps
