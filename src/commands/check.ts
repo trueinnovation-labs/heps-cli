@@ -10,7 +10,16 @@ export async function main(args: string[]): Promise<void> {
     return;
   }
 
-  const dirArg = args.find((a) => !a.startsWith("--"));
+  // ST-M3-IDENTITY-IMPL-01 (PO D-3) — `--categories <snapshot.json>`: check
+  // category bindings against a commerce dataset (a HUB category identity
+  // snapshot, format "hub.category-identity-snapshot" v1).
+  const categoriesIndex = args.indexOf("--categories");
+  const categoriesFile = categoriesIndex >= 0 ? args[categoriesIndex + 1] : undefined;
+  if (categoriesIndex >= 0 && (!categoriesFile || categoriesFile.startsWith("--"))) {
+    console.error("\nBLOCKED  --categories needs a snapshot file\n");
+    process.exit(1);
+  }
+  const dirArg = args.find((a, i) => !a.startsWith("--") && (categoriesIndex < 0 || i !== categoriesIndex + 1));
   const dir = path.resolve(dirArg ?? process.cwd());
 
   if (!fs.existsSync(dir)) {
@@ -32,7 +41,17 @@ export async function main(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const result = validateHepsPackageV2(pkg);
+  let categoryPaths: ReadonlySet<string> | undefined;
+  if (categoriesFile) {
+    try {
+      categoryPaths = readCategorySnapshotPaths(path.resolve(categoriesFile));
+    } catch (err) {
+      console.error(`\nBLOCKED  Could not read category snapshot\n  ${errorMessage(err)}\n`);
+      process.exit(1);
+    }
+  }
+
+  const result = validateHepsPackageV2(pkg, categoryPaths ? { categoryPaths } : {});
   const errors = result.issues.filter((i) => i.severity === "error");
   const warnings = result.issues.filter((i) => i.severity === "warning");
 
@@ -57,9 +76,28 @@ export async function main(args: string[]): Promise<void> {
   console.log("");
 }
 
+/** The url_paths of a HUB category identity snapshot (format v1). */
+function readCategorySnapshotPaths(file: string): ReadonlySet<string> {
+  const raw = JSON.parse(fs.readFileSync(file, "utf8")) as {
+    format?: unknown; version?: unknown; commerceStoreProfile?: unknown; categories?: unknown;
+  };
+  if (raw.format !== "hub.category-identity-snapshot" || raw.version !== 1) {
+    throw new Error(`${file} is not a category identity snapshot (format "hub.category-identity-snapshot", version 1)`);
+  }
+  if (typeof raw.commerceStoreProfile !== "string" || !Array.isArray(raw.categories)) {
+    throw new Error(`${file} has no commerceStoreProfile or categories`);
+  }
+  const paths = new Set<string>();
+  for (const category of raw.categories as Array<{ urlPath?: unknown }>) {
+    if (typeof category?.urlPath !== "string") throw new Error(`${file} has a category without urlPath`);
+    paths.add(category.urlPath);
+  }
+  return paths;
+}
+
 function printHelp(): void {
   console.log(`
-heps check [dir]
+heps check [dir] [--categories <snapshot.json>]
 
 Validates a HEPS v2 package using this CLI's own bundled HEPS SDK
 (src/sdk/ — readHepsPackageV2 + validateHepsPackageV2, no additional
@@ -67,6 +105,15 @@ CLI-side rules).
 
 Arguments:
   dir   Package directory. Default: current directory
+
+Options:
+  --categories <snapshot.json>
+        Also check every category binding against a commerce dataset: a HUB
+        category identity snapshot (format "hub.category-identity-snapshot",
+        version 1). A binding must be a full category path (url_path) of that
+        dataset — a leaf or route key is rejected (CATEGORY_BINDING_UNRESOLVED).
+        Without it, only the offline rules apply (full-path syntax, binding key
+        = composition entityKey).
 
 Exit codes:
   0  READY   — package is structurally and contractually valid
