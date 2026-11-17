@@ -137,6 +137,10 @@
         "items": {
           "type": "json",
           "required": true
+        },
+        "columns": {
+          "type": "select",
+          "required": false
         }
       },
       "theme": {
@@ -147,6 +151,7 @@
           ".category-cards__description",
           ".category-cards__card",
           ".category-cards__card-media",
+          ".category-cards__card-body",
           ".category-cards__card-eyebrow",
           ".category-cards__card-title",
           ".category-cards__card-description",
@@ -210,6 +215,15 @@
           "type": "arrayOf",
           "required": false
         }
+      },
+      "theme": {
+        "root": ".hot-sellers",
+        "elements": [
+          ".hot-sellers__title",
+          ".hot-sellers__card",
+          ".hot-sellers__nav-btn"
+        ],
+        "custom": false
       }
     },
     "featured-product": {
