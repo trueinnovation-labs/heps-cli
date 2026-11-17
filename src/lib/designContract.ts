@@ -25,6 +25,7 @@ export type DesignContractCatalog = {
 type PublicHooks = {
   classes: Set<string>;        // ".hero", ".hero__title", outlet hooks (without the dot)
   customRoots: Set<string>;    // agency component roots ("u30--shop-the-look")
+  customKinds: Set<string>;    // agency component kinds (same names as customRoots)
   hubModuleKinds: string[];    // every catalog module kind (to recognize internal HUB classes)
   regionAttribute: string | undefined;
 };
@@ -46,6 +47,7 @@ function publicHooksOf(catalog: DesignContractCatalog): PublicHooks {
   return {
     classes,
     customRoots,
+    customKinds: new Set(customRoots),
     hubModuleKinds: Object.keys(catalog.modules),
     regionAttribute: catalog.layoutHooks?.attribute,
   };
@@ -92,6 +94,18 @@ export function buildDesignContractWarnings(
   const seen = new Set<string>();
   const warn = (line: string) => { if (!seen.has(line)) { seen.add(line); warnings.push(line); } };
 
+  const regionMatches = (operator: string | undefined, value: string): boolean => {
+    if (!layoutIds) return true;
+    const ids = [...layoutIds];
+    switch (operator) {
+      case "=":  return layoutIds.has(value);
+      case "^=": return ids.some((id) => id.startsWith(value));
+      case "$=": return ids.some((id) => id.endsWith(value));
+      case "*=": return ids.some((id) => id.includes(value));
+      default:   return true; // ~=, |= or presence only: not an id comparison
+    }
+  };
+
   for (const selector of selectors) {
     let root: selectorParser.Root;
     try {
@@ -100,34 +114,56 @@ export function buildDesignContractWarnings(
       warn(`  UNKNOWN_DESIGN_SELECTOR  Selector "${selector}" could not be parsed.`);
       continue;
     }
-    root.each((single) => {
-      // Classes after an agency component root belong to the package (its own markup).
-      let insideOwnComponent = false;
-      single.walk((node) => {
+
+    // One compound selector chain. A part is "owned" (the package's own
+    // markup) only AFTER an agency component root compound followed by a
+    // descendant or child combinator (Agent B D-1): never through a sibling
+    // combinator (+, ~), never from a root inside :not()/:is()/:has().
+    const checkChain = (chain: selectorParser.Selector, ownedAtStart: boolean): void => {
+      let owned = ownedAtStart;
+      let rootInCompound = false;
+      for (const node of chain.nodes) {
+        if (node.type === "combinator") {
+          const value = node.value.trim();
+          if (rootInCompound && (value === "" || value === ">")) owned = true;
+          rootInCompound = false;
+          continue;
+        }
+        if (node.type === "pseudo") {
+          // Arguments are checked on their own; ownership never leaks out of them.
+          for (const inner of node.nodes) checkChain(inner, owned);
+          continue;
+        }
+        const ownedHere = owned || rootInCompound;
         if (node.type === "class") {
           const name = node.value;
-          if (hooks.customRoots.has(name)) { insideOwnComponent = true; return; }
-          if (insideOwnComponent || hooks.classes.has(name)) return;
+          if (hooks.customRoots.has(name)) { rootInCompound = true; continue; }
+          if (ownedHere || hooks.classes.has(name)) continue;
           const kind = hubModuleOf(name, hooks.hubModuleKinds);
-          if (kind) {
+          if (kind && hooks.customKinds.has(kind)) {
+            warn(`  UNKNOWN_DESIGN_CLASS  "${selector}": .${name} is a class of your custom component "${kind}" used outside its root. Write it as ".${kind} .${name}".`);
+          } else if (kind) {
             warn(`  INTERNAL_HUB_CLASS  "${selector}": .${name} is internal markup of the HUB module "${kind}", not a public hook — it may change without notice. Use a public hook of "${kind}" (see the Modules section) or the slot's [data-hub-region].`);
           } else {
             warn(`  UNKNOWN_DESIGN_CLASS  "${selector}": .${name} is not a public HUB hook. If it is HUB markup it may change without notice; your own classes belong inside your custom component.`);
           }
         } else if (node.type === "attribute") {
           if (hooks.regionAttribute && node.attribute === hooks.regionAttribute) {
-            if (layoutIds && node.value !== undefined && !layoutIds.has(node.value)) {
-              warn(`  UNKNOWN_LAYOUT_REGION  "${selector}": [${node.attribute}="${node.value}"] is not a slot or region id of this package's layout.`);
+            if (node.value !== undefined && !regionMatches(node.operator, node.value)) {
+              warn(`  UNKNOWN_LAYOUT_REGION  "${selector}": [${node.attribute}${node.operator}"${node.value}"] matches no slot or region id of this package's layout.`);
             }
-            return;
+            continue;
           }
-          if (!insideOwnComponent) warn(`  UNKNOWN_DESIGN_SELECTOR  "${selector}": attribute [${node.attribute}] is not a public HUB hook.`);
+          if (!ownedHere) warn(`  UNKNOWN_DESIGN_SELECTOR  "${selector}": attribute [${node.attribute}] is not a public HUB hook.`);
+        } else if (node.type === "id") {
+          if (!ownedHere) warn(`  UNKNOWN_DESIGN_SELECTOR  "${selector}": the id #${node.value} is not a public HUB hook.`);
         } else if (node.type === "tag") {
-          if (!insideOwnComponent) warn(`  MARKUP_ELEMENT_SELECTOR  "${selector}": the element "${node.value}" depends on the HUB's inner markup. Prefer a public element hook (e.g. .<module>__title).`);
+          if (!ownedHere) warn(`  MARKUP_ELEMENT_SELECTOR  "${selector}": the element "${node.value}" depends on the HUB's inner markup. Prefer a public element hook (e.g. .<module>__title).`);
         }
-        // pseudo-classes/elements, combinators, universal and nesting selectors are fine.
-      });
-    });
+        // universal and nesting selectors are fine.
+      }
+    };
+    root.each((chain) => checkChain(chain, false));
   }
   return warnings;
 }

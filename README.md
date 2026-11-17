@@ -194,12 +194,12 @@ heps inspect summer-sale --capabilities heps-capabilities.json
 | Part | Result |
 |---|---|
 | public module hook, outlet hook, `[data-hub-region]` with a slot/region id of your layout, pseudo-classes | ok |
-| any class or element **inside your own custom component** (`.u30--shop-the-look .u30-stl-title h2`) | ok — your markup |
+| any class or element **below your own custom component root** (descendant or child: `.u30--shop-the-look .u30-stl-title h2`; not siblings `+`/`~`) | ok — your markup |
 | a non-public class of a HUB module (`.hot-sellers__grid`) | `INTERNAL_HUB_CLASS` |
 | any other class (`.home-cat-card`) | `UNKNOWN_DESIGN_CLASS` |
 | an element selector on HUB markup (`.hero__actions a`, `h2`) | `MARKUP_ELEMENT_SELECTOR` |
 | `[data-hub-region="x"]` where `x` is no slot/region of your layout | `UNKNOWN_LAYOUT_REGION` |
-| another attribute, or an unparsable selector | `UNKNOWN_DESIGN_SELECTOR` |
+| an id (`#main`), another attribute, or an unparsable selector | `UNKNOWN_DESIGN_SELECTOR` |
 | catalog without `designContractVersion` (older HUB) → not verifiable; newer than this CLI → may be incomplete | `DESIGN_CONTRACT_VERSION` |
 
 Example (U30 Women page):

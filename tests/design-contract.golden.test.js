@@ -127,3 +127,34 @@ test("a field of an object type (json) is not split into dot-path 'unknown field
   assert.doesNotMatch(out, /UNKNOWN_MODULE_FIELD\s+Field "media\./);
   assert.match(out, /UNKNOWN_MODULE_FIELD\s+Field "notAField"/);
 });
+
+// ── Agent B D-1..D-4: ownership only for descendants of an own component root ──
+
+test("D-1: an own component root inside :not() owns nothing", () => {
+  assert.match(inspect(starterWithCss(":not(.u30--shop-the-look) .random-x { color: red; }")), /UNKNOWN_DESIGN_CLASS\s+"[^"]*": \.random-x/);
+});
+
+test("D-1: sibling combinators (+, ~) after an own component root target HUB markup and are checked", () => {
+  const out = inspect(starterWithCss(".u30--shop-the-look ~ .home-cat-card { color: red; }\n.u30--shop-the-look + h2 { color: red; }"));
+  assert.match(out, /UNKNOWN_DESIGN_CLASS\s+"\.u30--shop-the-look ~ \.home-cat-card"/);
+  assert.match(out, /MARKUP_ELEMENT_SELECTOR\s+"\.u30--shop-the-look \+ h2"/);
+});
+
+test("D-1: descendant and child combinators after the root are owned", () => {
+  assert.doesNotMatch(inspect(starterWithCss(".u30--shop-the-look > .u30-stl-grid h2 { color: red; }")), DESIGN_CODES);
+});
+
+test("D-2: id selectors are not public hooks", () => {
+  assert.match(inspect(starterWithCss("#main .hero__title { color: red; }")), /UNKNOWN_DESIGN_SELECTOR\s+"#main \.hero__title": the id #main/);
+});
+
+test("D-3: region attribute operators are respected (prefix match on real ids is ok, no match is reported)", () => {
+  assert.doesNotMatch(inspect(starterWithCss('[data-hub-region^="category."] { padding: 0; }')), /UNKNOWN_LAYOUT_REGION/);
+  assert.match(inspect(starterWithCss('[data-hub-region^="women."] { padding: 0; }')), /UNKNOWN_LAYOUT_REGION/);
+});
+
+test("D-4: an own component's class outside its root is named as such, not as HUB markup", () => {
+  const out = inspect(starterWithCss(".u30--shop-the-look__inner { color: red; }"));
+  assert.match(out, /UNKNOWN_DESIGN_CLASS\s+"[^"]*": \.u30--shop-the-look__inner is a class of your custom component "u30--shop-the-look" used outside its root/);
+  assert.doesNotMatch(out, /INTERNAL_HUB_CLASS[^\n]*u30--shop-the-look__inner/);
+});

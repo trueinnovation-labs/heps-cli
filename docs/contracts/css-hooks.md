@@ -32,7 +32,7 @@ This repository keeps **no list of its own**; `heps inspect --capabilities
 | Layout hook `[data-hub-region="<id>"]` | every **slot and named region of your own layout** | `[data-hub-region="category.u30-hero"]` |
 | Module root `.<module>` and elements `.<module>__<element>` | the module's theme contract in the HUB (catalog `modules[kind].theme`) | `.hero__title`, `.category-cards__card-body` |
 | Outlet hooks | HUB-rendered outlets (catalog `outletHooks`) | `.product-teaser-card__price` |
-| Your own custom component | `.<vendor>--<name>` root; **everything inside it is yours** | `.u30--shop-the-look .u30-stl-title` |
+| Your own custom component | `.<vendor>--<name>` root; its **descendants** (after a space or `>`) are yours — not its siblings (`+`, `~`), not a root inside `:not()` | `.u30--shop-the-look .u30-stl-title` |
 | Visual values | design tokens / CSS variables | `var(--color-primary)` |
 
 The catalog's `designContractVersion` names the contract version. A
@@ -51,12 +51,12 @@ Each selector is parsed and each part judged on its own:
 | Part | Result |
 |---|---|
 | public hook (above), pseudo-classes | ok |
-| class/element inside your own custom component | ok |
+| class/element/id **below** your own custom component root (descendant or child) | ok |
 | a non-public class of a HUB module (`.hot-sellers__grid`) | `INTERNAL_HUB_CLASS` |
 | any other class (`.home-cat-card`) | `UNKNOWN_DESIGN_CLASS` |
 | element selector on HUB markup (`.hero__actions a`) | `MARKUP_ELEMENT_SELECTOR` |
 | `[data-hub-region]` with an id your layout does not have | `UNKNOWN_LAYOUT_REGION` |
-| another attribute, unparsable selector | `UNKNOWN_DESIGN_SELECTOR` |
+| an id (`#main`), another attribute, unparsable selector | `UNKNOWN_DESIGN_SELECTOR` |
 
 All of these are **warnings**: they never block a build or an install.
 
