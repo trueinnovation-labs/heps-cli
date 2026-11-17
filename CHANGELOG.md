@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **Category bindings by full path and `heps check --categories <snapshot.json>`** (#17, ST-M3-IDENTITY D-3): a template's category binding is the category's full path in the shop, equal to the composition's `entityKey`; with a HUB category snapshot, every path is checked against that shop.
+- **Template `presentationOptions`** (#18, RECOVERY-02): the presentation settings a HUB's Studio may let a merchandiser change per page (`{ values, default }`); checked by `heps check`.
+- **`presentationOptions` list release `{ editable: true }`** (#19, FUNCTIONAL-04 slice 1): a list the merchandiser curates (e.g. `facets.filters`); a release takes exactly its own keys.
+- **Design contract check** (`edge-delivery-commerce-hub` #362): `heps inspect --capabilities` checks `overrides.css` against the HUB's exported design contract (`designContractVersion`, `modules[kind].theme`, `outletHooks`, `layoutHooks`). Every selector is parsed (`postcss-selector-parser`, new dependency); new warnings `INTERNAL_HUB_CLASS`, `UNKNOWN_DESIGN_CLASS`, `MARKUP_ELEMENT_SELECTOR`, `UNKNOWN_LAYOUT_REGION`, `UNKNOWN_DESIGN_SELECTOR`, `DESIGN_CONTRACT_VERSION`. Classes inside an agency custom component's root belong to the package.
+
+### Changed
+- A missing shop category is a warning, not a block (#18, COMMERCE-SCOPE-01).
+- Fields of an object type (`contentRef`, `json`) are no longer split into dot-paths and reported as `UNKNOWN_MODULE_FIELD`.
+- The example catalog `docs/contracts/runtime-capabilities/category-listing.example.json` carries the design contract fields.
+
+### Removed
+- **`UNDOCUMENTED_DESIGN_SELECTOR` and the hand-maintained Design Surface Registry** (`docs/contracts/design-surfaces/`). The HUB's exported catalog is the only source of public hooks; without `--capabilities`, design hooks are reported as "not checked".
+
 ## [0.4.0] — HEPS Baseline — 2026-08-04
 
 The first release where an external agency can go from a fresh `git

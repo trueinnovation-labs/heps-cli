@@ -1,10 +1,10 @@
 /*
- * Six stable public CSS hooks, nothing else — every selector below
- * matches an entry in docs/contracts/design-surfaces/category-listing.json.
- * `heps inspect` warns (UNDOCUMENTED_DESIGN_SELECTOR) on any other
- * selector — everything else in the rendered markup is internal
- * implementation and may change without notice. See README.md "Stable
- * CSS hooks" for what makes each one stable.
+ * Public CSS hooks only — every selector below is part of the target
+ * HUB's exported design contract (module theme hooks and outlet hooks,
+ * see docs/contracts/css-hooks.md). `heps inspect --capabilities <catalog>`
+ * reports INTERNAL_HUB_CLASS / UNKNOWN_DESIGN_CLASS / MARKUP_ELEMENT_SELECTOR
+ * for any other selector — everything else in the rendered markup is
+ * internal implementation and may change without notice.
  */
 
 /* listing.hero.title */

@@ -29,10 +29,12 @@ never assumed, never rediscovered per project.
 ```json
 {
   "version": "1",
+  "designContractVersion": 1,
   "modules": {
     "<moduleKind>": {
       "surfaces": ["category"],
       "allowedSlots": ["category.hero", "..."],
+      "theme": { "root": ".<moduleKind>", "elements": [".<moduleKind>__title"], "custom": false },
       "fields": {
         "<fieldName>": { "type": "string", "required": true },
         "cta.label":   { "type": "string", "required": false },
@@ -43,6 +45,10 @@ never assumed, never rediscovered per project.
   "outlets": {
     "<surface>": ["<outletName>", "..."]
   },
+  "outletHooks": {
+    "<surface>": { "<outletName>": [".<public-class>", "..."] }
+  },
+  "layoutHooks": { "attribute": "data-hub-region", "ids": "slot ids and region ids of the package's own layout" },
   "presentation": {
     "<surface>": {
       "<dot.path.key>": { "type": "string", "values": ["..."] }
@@ -135,6 +141,29 @@ dot-paths that document already states were "individually checked
 against one reference HUB's real theme CSS and confirmed consumed
 there" — not a new claim, just the first place that already-verified
 fact is machine-readable.
+
+### Design contract — `designContractVersion`, `modules[kind].theme`, `outletHooks`, `layoutHooks`
+
+The HUB's **public CSS hooks**, exported by the HUB from its own
+contracts (no list in this repository):
+
+- `designContractVersion` — the design contract version. Absent: the HUB
+  exports no design contract yet, and `heps inspect` reports design hooks
+  as **not verifiable** (`DESIGN_CONTRACT_VERSION`). Higher than this CLI
+  understands: reported, the check still runs.
+- `modules[kind].theme` — present only for modules with a governed theme
+  contract, and for agency custom components (`custom: true`). `root` is
+  `.<kind>`, `elements` are `.<kind>__<element>`. Inside a custom
+  component's root, every class belongs to the package.
+- `outletHooks[surface][outlet]` — public classes inside HUB-rendered
+  outlets.
+- `layoutHooks` — `[data-hub-region="<id>"]` on every slot and named
+  region; `heps inspect` accepts ids of the package's own layout.
+
+See [`css-hooks.md`](../css-hooks.md) for how `heps inspect` uses this.
+
+A field whose `type` is an object (`contentRef`, `json`) is one value:
+its nested keys (`contentRef.provider`) are not reported as unknown fields.
 
 ## What this is not
 

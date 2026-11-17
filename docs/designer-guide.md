@@ -67,31 +67,30 @@ including optional fields this example doesn't use yet
 
 ## Step 4 — Change the CSS
 
-Open `themes/default/overrides.css`. Every rule here targets one of
-exactly six selectors — the [Design Surface Registry](./contracts/design-surfaces/)'s
-own list. A real, already-proven example: give product cards a much
+Open `themes/default/overrides.css`. Every rule here targets a
+**public hook** of the HUB — hooks the HUB exports in its capability
+catalog (see [`css-hooks.md`](./contracts/css-hooks.md)). A real,
+already-proven example: give product cards a much
 larger corner radius and let the price pick up your new accent color:
 
 ```css
-/* listing.card */
 .product-teaser-card {
   border-radius: 1.25rem;   /* try 2rem, or 0 for sharp corners */
   overflow: hidden;
   border-color: var(--color-border);
 }
 
-/* listing.card.price */
 .product-teaser-card__price {
   color: var(--color-primary);  /* picks up whatever you set in Step 2 */
   font-weight: 600;
 }
 ```
 
-Selectors outside this list of six are internal implementation and can
-change without notice — `heps inspect` warns
-(`UNDOCUMENTED_DESIGN_SELECTOR`) if `overrides.css` ever drifts onto
-one. See [`css-hooks.md`](./contracts/css-hooks.md) for why only these
-six, and what "stable" actually means for each.
+Any other class, and element selectors on HUB markup, are internal and
+can change without notice. Check your CSS against your target HUB with
+`heps inspect --capabilities <catalog>`: it reports `INTERNAL_HUB_CLASS`,
+`UNKNOWN_DESIGN_CLASS` or `MARKUP_ELEMENT_SELECTOR` for selectors that
+are not public hooks. See [`css-hooks.md`](./contracts/css-hooks.md).
 
 ## Step 5 — Point it at a real category
 
@@ -191,7 +190,6 @@ full rules instead of the guided version:
 [Composition & Module](./contracts/composition-contract.md),
 [Theme Tokens](./contracts/theme-contract.md),
 [CSS Hooks](./contracts/css-hooks.md),
-[Design Surfaces](./contracts/design-surfaces/),
 [Runtime Capabilities](./contracts/runtime-capabilities/).
 
 ## Going Further — a second Slot in your Layout
