@@ -158,3 +158,47 @@ test("D-4: an own component's class outside its root is named as such, not as HU
   assert.match(out, /UNKNOWN_DESIGN_CLASS\s+"[^"]*": \.u30--shop-the-look__inner is a class of your custom component "u30--shop-the-look" used outside its root/);
   assert.doesNotMatch(out, /INTERNAL_HUB_CLASS[^\n]*u30--shop-the-look__inner/);
 });
+
+// ── requiredIf (#362): a required field only while its HUB rule holds ─────────
+
+/** The starter with its one slot set to the given module kind and fields. */
+function starterWithSlot(moduleKind, fieldsYaml) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "heps-required-if-"));
+  fs.cpSync(STARTER, dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "compositions", "category", "default.yaml"),
+    `surface: category\nslots:\n  - id: category.intro\n    moduleKind: ${moduleKind}\n    fields:\n${fieldsYaml}\n`,
+  );
+  return dir;
+}
+
+test("requiredIf: a CMS-backed rich content slot (contentRef set) needs no title/body", () => {
+  const out = inspect(starterWithSlot("category-cms-rich-content", "      contentRef:\n        provider: magnolia\n        contentId: women-story"));
+  assert.doesNotMatch(out, /MISSING_REQUIRED_MODULE_FIELD/);
+  assert.doesNotMatch(out, /UNKNOWN_MODULE_FIELD\s+Field "contentRef\./);
+  assert.match(out, /title {2}\(only when contentRef is empty\)/);
+});
+
+test("requiredIf: without contentRef, missing title/body are still reported", () => {
+  const out = inspect(starterWithSlot("category-cms-rich-content", '      eyebrow: "Story"'));
+  assert.match(out, /MISSING_REQUIRED_MODULE_FIELD\s+category-cms-rich-content requires "title"\./);
+  assert.match(out, /MISSING_REQUIRED_MODULE_FIELD\s+category-cms-rich-content requires "body"\./);
+});
+
+test("requiredIf: equals and truthy follow the HUB evaluator (missing controlling field = empty)", () => {
+  const catalog = catalogWith((c) => {
+    const f = c.modules["category-promo-banner"].fields;
+    f.title = { ...f.title, requiredIf: { field: "presentation", equals: "split" } };
+    f.description = { ...f.description, requiredIf: { field: "eyebrow", truthy: true } };
+  });
+  const withRules = (yaml) => inspect(starterWithSlot("category-promo-banner", yaml), catalog);
+  // presentation missing → equals false → title not required; eyebrow set → description required.
+  let out = withRules('      eyebrow: "Category"');
+  assert.doesNotMatch(out, /requires "title"/);
+  assert.match(out, /requires "description"/);
+  // presentation = split → title required; no eyebrow → description not required.
+  out = withRules('      presentation: "split"');
+  assert.match(out, /requires "title"/);
+  assert.doesNotMatch(out, /requires "description"/);
+});
+

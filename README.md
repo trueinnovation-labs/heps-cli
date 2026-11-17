@@ -183,7 +183,7 @@ The recurring Golden Test finding since the very first one: an agency knows a `m
 heps inspect summer-sale --capabilities heps-capabilities.json
 ```
 
-- `MISSING_REQUIRED_MODULE_FIELD` — a composition slot omits a field its module requires.
+- `MISSING_REQUIRED_MODULE_FIELD` — a composition slot omits a field its module requires (a field with `requiredIf` only while its rule holds, e.g. CMS rich content needs `title` only without `contentRef`).
 - `UNKNOWN_MODULE_FIELD` — a composition slot sets a field its module doesn't define, with a "did you mean" suggestion for a close typo.
 - `UNKNOWN_OUTLET` — a layout places an Outlet the catalog's `outlets` section doesn't list for any of that layout's declared surfaces. Only runs if the catalog has an `outlets` section for that surface at all.
 - `UNKNOWN_PRESENTATION_VALUE` — a template sets a `presentation` key the catalog's `presentation` section documents with a `values` enum, to a value outside that enum. A key the catalog doesn't mention is never flagged — Presentation stays an open vocabulary, same as Theme Tokens.

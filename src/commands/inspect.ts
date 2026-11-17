@@ -159,7 +159,10 @@ function printReport(
         lines.push(`  ${moduleKind}`);
         lines.push("");
         lines.push("  Required fields");
-        for (const f of required) lines.push(`    ${f}`);
+        for (const f of required) {
+          const rule = module.fields[f]!.requiredIf;
+          lines.push(rule ? `    ${f}  (only when ${describeRule(rule)})` : `    ${f}`);
+        }
         if (required.length === 0) lines.push("    (none)");
         lines.push("");
         lines.push("  Optional fields");
@@ -360,7 +363,15 @@ function buildUndefinedTokenReferenceWarnings(
 // layout/template (see buildOutletWarnings / buildPresentationWarnings
 // below) — advisory only, same posture as every other inspect warning.
 
-export type ModuleCapabilityField = { type: string; required?: boolean; values?: readonly string[] };
+/** Same rule shape as the HUB's `FieldVisibilityRule` (exported as `requiredIf`, #362). */
+export type FieldConditionRule = { field: string; equals?: unknown; notEquals?: unknown; truthy?: boolean; falsy?: boolean };
+export type ModuleCapabilityField = {
+  type: string;
+  required?: boolean;
+  /** With `required: true`: the field is required only while this rule holds. */
+  requiredIf?: FieldConditionRule;
+  values?: readonly string[];
+};
 export type RuntimeCapabilityCatalog = {
   version: string;
   modules: Record<string, {
@@ -434,6 +445,39 @@ function nearestFieldName(unknownField: string, knownFields: readonly string[]):
 /** Catalog field types whose value is a single object (never flattened into dot-path fields). */
 const OBJECT_FIELD_TYPES = new Set(["contentRef", "json"]);
 
+/** Value at a dotted field name ("cta.label") inside a slot's `fields:`; undefined when absent. */
+function fieldValueAt(fields: unknown, dottedName: string): unknown {
+  let value: unknown = fields;
+  for (const key of dottedName.split(".")) {
+    if (value == null || typeof value !== "object" || Array.isArray(value)) return undefined;
+    value = (value as Record<string, unknown>)[key];
+  }
+  return value;
+}
+
+/**
+ * #362 — evaluates a catalog `requiredIf` rule against a slot's fields with the
+ * HUB's own semantics (`evaluateFieldVisibility`): no rule = holds; a missing
+ * controlling field is an empty value (`truthy` false, `falsy` true).
+ */
+function ruleHolds(rule: FieldConditionRule | undefined, slotFields: unknown): boolean {
+  if (!rule) return true;
+  const value = fieldValueAt(slotFields, rule.field);
+  if (rule.equals !== undefined) return value === rule.equals;
+  if (rule.notEquals !== undefined) return value !== rule.notEquals;
+  if (rule.truthy) return Boolean(value);
+  if (rule.falsy) return !value;
+  return true;
+}
+
+function describeRule(rule: FieldConditionRule): string {
+  if (rule.equals !== undefined) return `${rule.field} = ${JSON.stringify(rule.equals)}`;
+  if (rule.notEquals !== undefined) return `${rule.field} ≠ ${JSON.stringify(rule.notEquals)}`;
+  if (rule.truthy) return `${rule.field} is set`;
+  if (rule.falsy) return `${rule.field} is empty`;
+  return rule.field;
+}
+
 function buildModuleFieldWarnings(
   moduleKind: string,
   slotFields: Record<string, unknown> | undefined,
@@ -444,7 +488,7 @@ function buildModuleFieldWarnings(
   const actualFieldPaths = flattenFieldPaths(slotFields);
 
   for (const [fieldName, def] of Object.entries(module.fields)) {
-    if (def.required && !actualFieldPaths.includes(fieldName)) {
+    if (def.required && !actualFieldPaths.includes(fieldName) && ruleHolds(def.requiredIf, slotFields)) {
       warnings.push(`  MISSING_REQUIRED_MODULE_FIELD  ${moduleKind} requires "${fieldName}".`);
     }
   }
@@ -642,6 +686,8 @@ docs/design-contract.md):
                                 this heps-cli understands
   MISSING_REQUIRED_MODULE_FIELD  (needs --capabilities) a composition
                                 slot omits a field its module requires
+                                (a "requiredIf" field only while its
+                                rule holds for that slot)
   UNKNOWN_MODULE_FIELD          (needs --capabilities) a composition
                                 slot sets a field its module doesn't define
   UNKNOWN_OUTLET                 (needs --capabilities with an "outlets"

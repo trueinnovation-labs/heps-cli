@@ -10,6 +10,7 @@
 
 ### Changed
 - A missing shop category is a warning, not a block (#18, COMMERCE-SCOPE-01).
+- `MISSING_REQUIRED_MODULE_FIELD` respects a catalog field's `requiredIf` rule (`edge-delivery-commerce-hub` #362): e.g. a CMS-backed `category-cms-rich-content` slot (with `contentRef`) no longer needs `title`/`body`.
 - Fields of an object type (`contentRef`, `json`) are no longer split into dot-paths and reported as `UNKNOWN_MODULE_FIELD`.
 - The example catalog `docs/contracts/runtime-capabilities/category-listing.example.json` carries the design contract fields.
 

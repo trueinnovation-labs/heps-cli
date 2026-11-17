@@ -69,6 +69,16 @@ never assumed, never rediscovered per project.
   values the same way before comparing.
 - **`required`** — drives `heps inspect`'s `MISSING_REQUIRED_MODULE_FIELD`
   warning, advisory only. `heps check` never reads this file.
+- **`requiredIf`** (optional, with `required: true`) — the field is required
+  only while this rule holds for the slot's own fields. Same rule shape and
+  meaning as the HUB editor's conditional fields: `{ field, equals }`,
+  `{ field, notEquals }`, `{ field, truthy: true }` or `{ field, falsy: true }`;
+  a controlling field the slot does not set counts as empty. Example: the
+  HUB's `category-cms-rich-content` declares
+  `"title": { "type": "text", "required": true, "requiredIf": { "field": "contentRef", "falsy": true } }`
+  — a CMS-backed slot (with `contentRef`) needs no `title`, a hand-written
+  one does. `heps inspect` lists such a field as
+  `title  (only when contentRef is empty)`.
 - **`values`** (optional) — known enum values, shown for reference; not
   currently cross-checked.
 - **`allowedSlots`** — cross-checked by `heps inspect` against a
