@@ -7,8 +7,8 @@
     "heps": "./bin/heps.js"
   },
   "scripts": {
-    "build":          "node scripts/clean.mjs && tsc",
-    "test":           "npm run build && node --test",
+    "build": "node scripts/clean.mjs && tsc",
+    "test": "npm run build && node --test",
     "prepublishOnly": "npm run build"
   },
   "files": [
@@ -16,12 +16,21 @@
     "lib/",
     "starters/"
   ],
-  "keywords": ["heps", "commerce", "experience", "theme", "cli"],
+  "keywords": [
+    "heps",
+    "commerce",
+    "experience",
+    "theme",
+    "cli"
+  ],
   "license": "MIT",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
     "js-yaml": "^4.3.2",
+    "postcss-selector-parser": "^7.2.1",
     "yaml": "^2.7.0"
   },
   "devDependencies": {

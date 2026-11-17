@@ -1,0 +1,1227 @@
+{
+  "version": "1",
+  "designContractVersion": 1,
+  "modules": {
+    "hero": {
+      "surfaces": [
+        "home",
+        "category",
+        "magazine",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.hero",
+        "category.collection-intro",
+        "magazine.editorial-banner",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "mediaType": {
+          "type": "select",
+          "required": false
+        },
+        "imageUrl": {
+          "type": "assetRef",
+          "required": false
+        },
+        "videoAssetRef": {
+          "type": "assetRef",
+          "required": false
+        },
+        "posterAssetRef": {
+          "type": "assetRef",
+          "required": false
+        },
+        "imageAlt": {
+          "type": "text",
+          "required": false
+        },
+        "graphicUrl": {
+          "type": "assetRef",
+          "required": false
+        },
+        "graphicAlt": {
+          "type": "text",
+          "required": false
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "primaryCtaHref": {
+          "type": "link",
+          "required": false
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaHref": {
+          "type": "link",
+          "required": false
+        },
+        "playback.autoplay": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.muted": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.loop": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.controls": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.playsInline": {
+          "type": "boolean",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".hero",
+        "elements": [
+          ".hero__eyebrow",
+          ".hero__title",
+          ".hero__description",
+          ".hero__media",
+          ".hero__graphic",
+          ".hero__actions"
+        ],
+        "custom": false
+      }
+    },
+    "category-cards": {
+      "surfaces": [
+        "home",
+        "category",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.category-entry",
+        "category.browse-entry",
+        "women.collections",
+        "women.activities",
+        "home.filterBar",
+        "home.shop-the-look",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "items": {
+          "type": "json",
+          "required": true
+        },
+        "columns": {
+          "type": "select",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".category-cards",
+        "elements": [
+          ".category-cards__eyebrow",
+          ".category-cards__title",
+          ".category-cards__description",
+          ".category-cards__card",
+          ".category-cards__card-media",
+          ".category-cards__card-body",
+          ".category-cards__card-eyebrow",
+          ".category-cards__card-title",
+          ".category-cards__card-description",
+          ".category-cards__card-cta"
+        ],
+        "custom": false
+      }
+    },
+    "hot-sellers": {
+      "surfaces": [
+        "home",
+        "category",
+        "cart",
+        "pdp",
+        "magazine",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.hot-sellers",
+        "category.hot-sellers",
+        "hot-sellers",
+        "women.trending",
+        "women.essentials",
+        "home.hotsellers-augenlicht",
+        "home.hotsellers-bildung",
+        "home.hotsellers-gesundheit",
+        "home.hotsellers-selbststandigkeit",
+        "magazine.recommendations",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "subtitle": {
+          "type": "textarea",
+          "required": false
+        },
+        "source.kind": {
+          "type": "select",
+          "required": true
+        },
+        "source.skus": {
+          "type": "productSku",
+          "required": false
+        },
+        "source.categoryId": {
+          "type": "categoryRef",
+          "required": false
+        },
+        "count": {
+          "type": "select",
+          "required": false
+        },
+        "columns": {
+          "type": "select",
+          "required": false
+        },
+        "imageOverrides": {
+          "type": "arrayOf",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".hot-sellers",
+        "elements": [
+          ".hot-sellers__title",
+          ".hot-sellers__card",
+          ".hot-sellers__nav-btn"
+        ],
+        "custom": false
+      }
+    },
+    "featured-product": {
+      "surfaces": [
+        "home",
+        "category",
+        "magazine",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.featured-product",
+        "category.featured-product",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "product": {
+          "type": "productSku",
+          "required": false
+        },
+        "imageRatio": {
+          "type": "select",
+          "required": false
+        }
+      }
+    },
+    "home-membership-cta": {
+      "surfaces": [
+        "home",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.membership-cta",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "primaryCtaHref": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaHref": {
+          "type": "text",
+          "required": false
+        },
+        "backgroundImageUrl": {
+          "type": "assetRef",
+          "required": false
+        },
+        "backgroundImageAlt": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "home-brand-community": {
+      "surfaces": [
+        "home",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "home.brand-community",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": true
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "required": true
+        },
+        "primaryCtaHref": {
+          "type": "text",
+          "required": true
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaHref": {
+          "type": "text",
+          "required": false
+        },
+        "backgroundImageUrl": {
+          "type": "assetRef",
+          "required": false
+        }
+      }
+    },
+    "category-campaign-strip": {
+      "surfaces": [
+        "category"
+      ],
+      "allowedSlots": [
+        "category.campaign-strip"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "link",
+          "required": false
+        }
+      }
+    },
+    "category-cms-rich-content": {
+      "surfaces": [
+        "category",
+        "home",
+        "magazine",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "category.cms-rich-content",
+        "category.supporting-content.1",
+        "category.supporting-content.2",
+        "category.supporting-content.3",
+        "category.supporting-content.4",
+        "home.shopIntro",
+        "magazine.story",
+        "magazine.hero",
+        "cms-page.story",
+        "cms-page.hero"
+      ],
+      "fields": {
+        "contentRef": {
+          "type": "contentRef",
+          "required": false
+        },
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "body": {
+          "type": "textarea",
+          "required": true
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        },
+        "imageUrl": {
+          "type": "assetRef",
+          "required": false
+        },
+        "imageAlt": {
+          "type": "text",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".category-cms-rich-content",
+        "elements": [
+          ".category-cms-rich-content__content",
+          ".category-cms-rich-content__eyebrow",
+          ".category-cms-rich-content__title",
+          ".category-cms-rich-content__body",
+          ".category-cms-rich-content__cta"
+        ],
+        "custom": false
+      }
+    },
+    "category-promo-banner": {
+      "surfaces": [
+        "category",
+        "home",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "category.promo-banner",
+        "category.hero",
+        "category.editorial-feature",
+        "category.editorial-rain",
+        "category.editorial-waterproof",
+        "women.hero",
+        "women.featured",
+        "women.story-feature",
+        "women.story-secondary",
+        "women.story-tertiary",
+        "women.closing",
+        "category.supporting-content.5",
+        "home.winter-edit",
+        "home.sustainable",
+        "home.made-for-you",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": true
+        },
+        "mediaType": {
+          "type": "select",
+          "required": false
+        },
+        "imageUrl": {
+          "type": "assetRef",
+          "required": false
+        },
+        "videoAssetRef": {
+          "type": "assetRef",
+          "required": false
+        },
+        "posterAssetRef": {
+          "type": "assetRef",
+          "required": false
+        },
+        "presentation": {
+          "type": "select",
+          "required": false,
+          "values": [
+            "overlay",
+            "split"
+          ]
+        },
+        "cta.label": {
+          "type": "text",
+          "required": false
+        },
+        "cta.href": {
+          "type": "link",
+          "required": false
+        },
+        "playback.autoplay": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.muted": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.loop": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.controls": {
+          "type": "boolean",
+          "required": false
+        },
+        "playback.playsInline": {
+          "type": "boolean",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".category-promo-banner",
+        "elements": [
+          ".category-promo-banner__eyebrow",
+          ".category-promo-banner__title",
+          ".category-promo-banner__description",
+          ".category-promo-banner__media",
+          ".category-promo-banner__actions"
+        ],
+        "custom": false
+      }
+    },
+    "process-steps": {
+      "surfaces": [
+        "category"
+      ],
+      "allowedSlots": [
+        "category.supporting-content.1",
+        "category.supporting-content.2",
+        "category.supporting-content.3",
+        "category.supporting-content.4"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "items": {
+          "type": "json",
+          "required": true
+        }
+      },
+      "theme": {
+        "root": ".process-steps",
+        "elements": [
+          ".process-steps__content",
+          ".process-steps__eyebrow",
+          ".process-steps__title",
+          ".process-steps__list",
+          ".process-steps__item",
+          ".process-steps__number",
+          ".process-steps__icon",
+          ".process-steps__item-title",
+          ".process-steps__item-description"
+        ],
+        "custom": false
+      }
+    },
+    "trueinnovation--promo-banner": {
+      "surfaces": [
+        "category"
+      ],
+      "allowedSlots": [
+        "category.promo-banner",
+        "category.campaign-strip"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "message": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        },
+        "design": {
+          "type": "select",
+          "required": true
+        }
+      },
+      "theme": {
+        "root": ".trueinnovation--promo-banner",
+        "elements": [
+          ".trueinnovation--promo-banner__content",
+          ".trueinnovation--promo-banner__title",
+          ".trueinnovation--promo-banner__message",
+          ".trueinnovation--promo-banner__cta"
+        ],
+        "custom": true
+      }
+    },
+    "u30--shop-the-look": {
+      "surfaces": [
+        "category"
+      ],
+      "allowedSlots": [
+        "category.u30-look"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "text": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaLink": {
+          "type": "link",
+          "required": false
+        },
+        "video": {
+          "type": "assetRef",
+          "required": false
+        },
+        "poster": {
+          "type": "assetRef",
+          "required": false
+        },
+        "outfitImage": {
+          "type": "assetRef",
+          "required": false
+        },
+        "product": {
+          "type": "productSku",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".u30--shop-the-look",
+        "elements": [],
+        "custom": true
+      }
+    },
+    "navigation-promo": {
+      "surfaces": [
+        "global"
+      ],
+      "allowedSlots": [
+        "navigation.women.promo",
+        "navigation.jackets.promo"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".navigation-promo",
+        "elements": [
+          ".navigation-promo__body",
+          ".navigation-promo__eyebrow",
+          ".navigation-promo__title",
+          ".navigation-promo__description",
+          ".navigation-promo__cta"
+        ],
+        "custom": false
+      }
+    },
+    "product-badge": {
+      "surfaces": [
+        "product-card"
+      ],
+      "allowedSlots": [
+        "product-card.badge"
+      ],
+      "fields": {
+        "label": {
+          "type": "text",
+          "required": true
+        },
+        "variant": {
+          "type": "select",
+          "required": true,
+          "values": [
+            "badge",
+            "ribbon"
+          ]
+        },
+        "tone": {
+          "type": "select",
+          "required": false
+        }
+      }
+    },
+    "checkout-hero": {
+      "surfaces": [
+        "checkout"
+      ],
+      "allowedSlots": [
+        "checkout.hero"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "checkout-trust-banner": {
+      "surfaces": [
+        "checkout"
+      ],
+      "allowedSlots": [
+        "checkout.trust-strip"
+      ],
+      "fields": {
+        "item1": {
+          "type": "text",
+          "required": true
+        },
+        "item2": {
+          "type": "text",
+          "required": false
+        },
+        "item3": {
+          "type": "text",
+          "required": false
+        },
+        "item4": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "checkout-review-message": {
+      "surfaces": [
+        "checkout"
+      ],
+      "allowedSlots": [
+        "checkout.review-message"
+      ],
+      "fields": {
+        "item1": {
+          "type": "text",
+          "required": true
+        },
+        "item2": {
+          "type": "text",
+          "required": false
+        },
+        "item3": {
+          "type": "text",
+          "required": false
+        },
+        "item4": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "checkout-completion-cta": {
+      "surfaces": [
+        "checkout"
+      ],
+      "allowedSlots": [
+        "checkout.completion-cta"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "search-intro": {
+      "surfaces": [
+        "search"
+      ],
+      "allowedSlots": [
+        "search.intro"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "text": {
+          "type": "textarea",
+          "required": false
+        }
+      }
+    },
+    "search-no-results-help": {
+      "surfaces": [
+        "search"
+      ],
+      "allowedSlots": [
+        "search.no-results-help"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "text": {
+          "type": "textarea",
+          "required": false
+        }
+      }
+    },
+    "search-below-results": {
+      "surfaces": [
+        "search"
+      ],
+      "allowedSlots": [
+        "search.below-results"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "text": {
+          "type": "textarea",
+          "required": false
+        }
+      }
+    },
+    "campaign-hero": {
+      "surfaces": [
+        "campaign"
+      ],
+      "allowedSlots": [
+        "campaign.module.hero"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "primaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "primaryCtaHref": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "secondaryCtaHref": {
+          "type": "text",
+          "required": false
+        },
+        "imageUrl": {
+          "type": "text",
+          "required": false
+        },
+        "imageAlt": {
+          "type": "text",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".campaign-hero",
+        "elements": [
+          ".campaign-hero__eyebrow",
+          ".campaign-hero__title",
+          ".campaign-hero__description",
+          ".campaign-hero__media",
+          ".campaign-hero__actions"
+        ],
+        "custom": false
+      }
+    },
+    "campaign-summary": {
+      "surfaces": [
+        "campaign"
+      ],
+      "allowedSlots": [
+        "campaign.module.summary"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "text": {
+          "type": "textarea",
+          "required": true
+        }
+      },
+      "theme": {
+        "root": ".campaign-summary",
+        "elements": [
+          ".campaign-summary__title",
+          ".campaign-summary__text"
+        ],
+        "custom": false
+      }
+    },
+    "campaign-highlights": {
+      "surfaces": [
+        "campaign",
+        "category"
+      ],
+      "allowedSlots": [
+        "campaign.module.highlights",
+        "category.supporting-content.1",
+        "category.supporting-content.2",
+        "category.supporting-content.3",
+        "category.supporting-content.4",
+        "category.supporting-content.6"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "items": {
+          "type": "json",
+          "required": true
+        }
+      },
+      "theme": {
+        "root": ".campaign-highlights",
+        "elements": [
+          ".campaign-highlights__eyebrow",
+          ".campaign-highlights__title",
+          ".campaign-highlights__card",
+          ".campaign-highlights__card-icon",
+          ".campaign-highlights__card-title",
+          ".campaign-highlights__card-text"
+        ],
+        "custom": false
+      }
+    },
+    "campaign-categories": {
+      "surfaces": [
+        "campaign"
+      ],
+      "allowedSlots": [
+        "campaign.module.categories"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "items": {
+          "type": "json",
+          "required": true
+        }
+      },
+      "theme": {
+        "root": ".campaign-categories",
+        "elements": [
+          ".campaign-categories__title",
+          ".campaign-categories__card",
+          ".campaign-categories__card-title",
+          ".campaign-categories__card-text"
+        ],
+        "custom": false
+      }
+    },
+    "campaign-faq": {
+      "surfaces": [
+        "campaign",
+        "home",
+        "category",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "campaign.module.faq",
+        "category.supporting-content.1",
+        "category.supporting-content.2",
+        "category.supporting-content.3",
+        "category.supporting-content.4",
+        "home.faq",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": false
+        },
+        "items": {
+          "type": "json",
+          "required": true
+        }
+      }
+    },
+    "cart-promotion-banner": {
+      "surfaces": [
+        "cart"
+      ],
+      "allowedSlots": [
+        "cart.announcement",
+        "cart.vip-message",
+        "cart.cross-sell"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "required": false
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "cart-trust-strip": {
+      "surfaces": [
+        "cart",
+        "home",
+        "cms-page"
+      ],
+      "allowedSlots": [
+        "cart.trust-strip",
+        "home.trust-strip",
+        "cms-page.hub-enrichment"
+      ],
+      "fields": {
+        "item1": {
+          "type": "text",
+          "required": true
+        },
+        "item2": {
+          "type": "text",
+          "required": false
+        },
+        "item3": {
+          "type": "text",
+          "required": false
+        },
+        "item4": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "cart-campaign-countdown": {
+      "surfaces": [
+        "cart"
+      ],
+      "allowedSlots": [
+        "cart.campaign-banner"
+      ],
+      "fields": {
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "endDate": {
+          "type": "datetime",
+          "required": true
+        },
+        "expiredMessage": {
+          "type": "text",
+          "required": false
+        }
+      }
+    },
+    "pdp-editorial": {
+      "surfaces": [
+        "pdp"
+      ],
+      "allowedSlots": [
+        "pdp.editorial"
+      ],
+      "fields": {
+        "eyebrow": {
+          "type": "text",
+          "required": false
+        },
+        "title": {
+          "type": "text",
+          "required": true
+        },
+        "body": {
+          "type": "textarea",
+          "required": true
+        },
+        "ctaLabel": {
+          "type": "text",
+          "required": false
+        },
+        "ctaHref": {
+          "type": "text",
+          "required": false
+        }
+      }
+    }
+  },
+  "outlets": {
+    "category": [
+      "listingContent",
+      "productNavigation"
+    ]
+  },
+  "outletHooks": {
+    "category": {
+      "listingContent": [
+        ".category-product-listing-grid",
+        ".product-teaser-card",
+        ".product-teaser-card__image",
+        ".product-teaser-card__price"
+      ],
+      "productNavigation": [
+        ".category-product-nav"
+      ]
+    }
+  },
+  "layoutHooks": {
+    "attribute": "data-hub-region",
+    "ids": "slot ids and region ids of the package's own layout"
+  }
+}

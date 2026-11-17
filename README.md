@@ -131,6 +131,14 @@ READY  Summer Sale v1.0.0
 
 Exit code `0` for READY, `1` for BLOCKED (with per-file error detail).
 
+**Category bindings** (`templates/*.yaml` `compositions:` keys) use the category's **full path** in the shop (e.g. `women/tops-women`), equal to the bound composition's `entityKey`. Offline, `heps check` verifies that shape. With a category snapshot exported from the target HUB, it also verifies that every path exists in that shop (a path the shop does not have is a warning, never a block):
+
+```bash
+heps check summer-sale --categories hub-category-snapshot.json
+```
+
+**`presentationOptions`** (in a template) release the presentation settings the HUB's Studio may let a merchandiser change per page: `{ values, default }` for a choice, or `{ editable: true }` for a list the merchandiser curates (e.g. `facets.filters`). A setting not listed is not editable. `heps check` verifies the structure; which settings a HUB can apply is checked by that HUB at install. Details: [`docs/design-contract.md`](./docs/design-contract.md), Template chapter.
+
 ### `heps build [dir]`
 
 Runs `heps check` internally, then packages the validated source for distribution. No compilation — the HUB compiles at install time.
@@ -159,12 +167,13 @@ Read-only design overview — no validation (see `heps check` for that), no HUB 
 heps inspect summer-sale
 ```
 
-Four advisory warnings, never blocking — HEPS's token namespace is open by design (see [`docs/design-contract.md`](./docs/design-contract.md)), so this never rejects a token or selector as "unknown":
+Three advisory warnings, never blocking — HEPS's token namespace is open by design (see [`docs/design-contract.md`](./docs/design-contract.md)), so this never rejects a token as "unknown":
 
 - `UNUSED_LOCAL_TOKEN` — a token is defined in `tokens.json` but this theme's own `overrides.css` never references its generated CSS variable.
 - `UNDEFINED_TOKEN_REFERENCE` — `overrides.css` references a CSS variable no token in `tokens.json` actually produces.
 - `UNREFERENCED_ASSET` — a file exists under `assets/` but no composition field references it.
-- `UNDOCUMENTED_DESIGN_SELECTOR` — `overrides.css` uses a selector that isn't part of the [Design Surface Registry](./docs/contracts/design-surfaces/) (today: `category-listing` only — a package targeting a different surface won't be checked against it).
+
+Your CSS selectors are checked against the target HUB's **design contract** only with `--capabilities` (below): the HUB's exported catalog is the only source of public hooks. Without it, `heps inspect` says "Design hooks: not checked".
 
 #### `--capabilities <file>` — Runtime Capability Discovery
 
@@ -180,7 +189,31 @@ heps inspect summer-sale --capabilities heps-capabilities.json
 - `UNKNOWN_PRESENTATION_VALUE` — a template sets a `presentation` key the catalog's `presentation` section documents with a `values` enum, to a value outside that enum. A key the catalog doesn't mention is never flagged — Presentation stays an open vocabulary, same as Theme Tokens.
 - `SLOT_NOT_ALLOWED_BY_MODULE` — a module's own `allowedSlots` (MODULE-01) doesn't list the slot a composition actually placed it in.
 
-Without `--capabilities`, `heps inspect` behaves exactly as before — no `Modules` section, none of these five warnings.
+**Design hooks (design contract).** The catalog also carries the HUB's public CSS hooks: `.<module>` and `.<module>__<element>` from each module's theme contract, the hooks inside HUB outlets (`.product-teaser-card__price`, …), and `[data-hub-region="<id>"]` on every slot and region of **your own** layout. Every selector in `overrides.css` is parsed and each part is checked:
+
+| Part | Result |
+|---|---|
+| public module hook, outlet hook, `[data-hub-region]` with a slot/region id of your layout, pseudo-classes | ok |
+| any class or element **below your own custom component root** (descendant or child: `.u30--shop-the-look .u30-stl-title h2`; not siblings `+`/`~`) | ok — your markup |
+| a non-public class of a HUB module (`.hot-sellers__grid`) | `INTERNAL_HUB_CLASS` |
+| any other class (`.home-cat-card`) | `UNKNOWN_DESIGN_CLASS` |
+| an element selector on HUB markup (`.hero__actions a`, `h2`) | `MARKUP_ELEMENT_SELECTOR` |
+| `[data-hub-region="x"]` where `x` is no slot/region of your layout | `UNKNOWN_LAYOUT_REGION` |
+| an id (`#main`), another attribute, or an unparsable selector | `UNKNOWN_DESIGN_SELECTOR` |
+| catalog without `designContractVersion` (older HUB) → not verifiable; newer than this CLI → may be incomplete | `DESIGN_CONTRACT_VERSION` |
+
+Example (U30 Women page):
+
+```css
+/* ok: public hooks */
+[data-hub-region="category.u30-hero"] .hero__title { font-style: italic; }
+.category-cards__card-body { padding: 0 0 14px 12%; }
+/* warned: internal markup that may change without notice */
+.home-cat-card__overlay { background: none; }   /* UNKNOWN_DESIGN_CLASS */
+[data-hub-region="category.u30-trending"] h2 { } /* MARKUP_ELEMENT_SELECTOR */
+```
+
+Without `--capabilities`, `heps inspect` shows no `Modules` section and none of these catalog-based warnings.
 
 One more warning needs no `--capabilities` at all, since it's a fact about the package's own files, not the catalog's:
 
@@ -220,15 +253,9 @@ producing a variable is guaranteed but a HUB actually consuming it never
 is.
 
 [`docs/contracts/css-hooks.md`](./docs/contracts/css-hooks.md) — scoping,
-the disallowed-selector rule, and the honest headline: no general,
-any-HUB CSS Hook Contract exists yet, only one reference HUB's own
-committed selectors.
-
-[`docs/contracts/design-surfaces/`](./docs/contracts/design-surfaces/) —
-a stable semantic name (`listing.card.price`) for each already-committed
-CSS selector, so the name an agency learns can outlive the implementation
-class behind it. Only lists what's already real and tested — see that
-folder's own README for the rule.
+the disallowed-selector rule, and the design contract: which CSS hooks a
+HUB guarantees, where they come from (the HUB's exported catalog, not a
+list in this repository) and how `heps inspect --capabilities` checks them.
 
 [`docs/contracts/runtime-capabilities/`](./docs/contracts/runtime-capabilities/) —
 the format `heps inspect --capabilities` reads: which `moduleKind`s a HUB
@@ -253,8 +280,9 @@ Documented deliberately, not silently deferred — full detail in
   `SLOT_NOT_ALLOWED_BY_MODULE`), but no public catalog demonstrates the
   Slot side (`accepts`) populated on a real, shipped starter yet — only
   in golden tests constructed for the purpose.
-- The Design Surface Registry covers the `category-listing` surface
-  only.
+- Design hooks are checked only with `--capabilities` and only against
+  what the target HUB exports; a HUB that does not export a design
+  contract yet (no `designContractVersion`) is reported as not verifiable.
 - No local runtime preview (`heps dev`) — inspecting and validating a
   package is fully local; seeing it rendered requires a real HUB.
 

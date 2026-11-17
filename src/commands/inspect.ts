@@ -10,21 +10,7 @@ import type {
   HepsTokenLeaf,
 } from "../sdk/index.js";
 import { errorMessage } from "../lib/printValidationIssues.js";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Fixed for now, deliberately — there is exactly one Design Surface
-// Registry today (docs/contracts/design-surfaces/category-listing.json,
-// see DESIGN-01). No auto-discovery, no assumption that every `category`
-// surface shares it: a different category layout could have a
-// completely different Slot/Outlet shape and would need its own
-// registry, not this one silently applied to it. Warning text below
-// names this registry explicitly so a package this doesn't apply to
-// reads as "not part of this specific registry," not "rejected by HEPS."
-const CATEGORY_LISTING_REGISTRY_PATH = path.resolve(
-  __dirname, "..", "..", "docs", "contracts", "design-surfaces", "category-listing.json",
-);
+import { buildDesignContractWarnings, type DesignContractCatalog } from "../lib/designContract.js";
 
 export async function main(args: string[]): Promise<void> {
   if (args.includes("--help") || args.includes("-h")) {
@@ -91,7 +77,6 @@ function printReport(
   capabilities: RuntimeCapabilityCatalog | undefined,
   capabilitiesError: string | undefined,
 ): void {
-  const registry = loadDesignSurfaceRegistry(CATEGORY_LISTING_REGISTRY_PATH);
   const lines: string[] = [];
 
   lines.push("HEPS Design");
@@ -229,13 +214,17 @@ function printReport(
 
     warningLines.push(...buildTokenWarnings(tokenPairs, theme.overridesCss ?? ""));
     warningLines.push(...buildUndefinedTokenReferenceWarnings(tokenPairs, theme.overridesCss ?? ""));
-    warningLines.push(...buildUndocumentedSelectorWarnings(selectors, registry));
+    // #362 — design hooks are checked against the HUB's exported design
+    // contract only (the catalog); without a catalog there is nothing to check against.
+    if (capabilities) {
+      warningLines.push(...buildDesignContractWarnings(selectors, pkg, capabilities as unknown as DesignContractCatalog));
+    } else if (selectors.length > 0) {
+      lines.push("Design hooks: not checked — run with --capabilities <catalog exported from your HUB>");
+      lines.push("");
+    }
   }
 
   warningLines.push(...buildAssetWarnings(pkg));
-  if (registry.error) {
-    warningLines.push(`  DESIGN_SURFACE_REGISTRY_UNAVAILABLE  ${registry.error}`);
-  }
   if (capabilitiesError) {
     warningLines.push(`  RUNTIME_CAPABILITY_CATALOG_UNAVAILABLE  ${capabilitiesError}`);
   }
@@ -360,37 +349,6 @@ function buildUndefinedTokenReferenceWarnings(
     .map((varName) => `  UNDEFINED_TOKEN_REFERENCE  CSS references "${varName}", but no matching token path exists in tokens.json.`);
 }
 
-// ── Design Surface Registry cross-check (DESIGN-01) ──────────────────────────
-
-type DesignSurfaceRegistry = { selectors: Set<string>; error?: string };
-
-/**
- * Exported (not just used internally) so tests can point this at a bogus
- * path directly, rather than renaming the real, shared registry file out
- * from under other tests/processes that read it concurrently.
- */
-export function loadDesignSurfaceRegistry(registryPath: string): DesignSurfaceRegistry {
-  if (!fs.existsSync(registryPath)) {
-    return { selectors: new Set(), error: "category-listing design surface registry not found — skipping selector cross-check." };
-  }
-  try {
-    const raw = JSON.parse(fs.readFileSync(registryPath, "utf8")) as Record<string, { selector: string }>;
-    return { selectors: new Set(Object.values(raw).map((entry) => entry.selector)) };
-  } catch (err) {
-    return {
-      selectors: new Set(),
-      error: `category-listing design surface registry could not be read (${errorMessage(err)}) — skipping selector cross-check.`,
-    };
-  }
-}
-
-function buildUndocumentedSelectorWarnings(selectors: string[], registry: DesignSurfaceRegistry): string[] {
-  if (registry.selectors.size === 0) return [];
-  return selectors
-    .filter((selector) => !registry.selectors.has(selector))
-    .map((selector) => `  UNDOCUMENTED_DESIGN_SELECTOR  Selector "${selector}" is not part of the current category-listing design surface registry.`);
-}
-
 // ── Runtime Capability Catalog (optional, HUB-owned, never bundled) ─────────
 //
 // The HUB owns which modules, outlets, presentation values, and consumed
@@ -415,7 +373,7 @@ export type RuntimeCapabilityCatalog = {
   tokens?: { consumed?: readonly string[] };
 };
 
-/** Exported so tests can point this at a bogus path directly (see loadDesignSurfaceRegistry). */
+/** Exported so tests can point this at a bogus path directly. */
 export function loadRuntimeCapabilities(catalogPath: string): RuntimeCapabilityCatalog | { error: string } {
   if (!fs.existsSync(catalogPath)) {
     return { error: `Runtime capability catalog not found: ${catalogPath}` };
@@ -473,6 +431,9 @@ function nearestFieldName(unknownField: string, knownFields: readonly string[]):
   return bestDistance <= 3 ? best : undefined;
 }
 
+/** Catalog field types whose value is a single object (never flattened into dot-path fields). */
+const OBJECT_FIELD_TYPES = new Set(["contentRef", "json"]);
+
 function buildModuleFieldWarnings(
   moduleKind: string,
   slotFields: Record<string, unknown> | undefined,
@@ -488,7 +449,11 @@ function buildModuleFieldWarnings(
     }
   }
 
+  // #362 — a field whose catalog type is an object (e.g. contentRef: { provider, contentId })
+  // is one value, not nested fields: its dot-paths are not unknown fields.
+  const objectFields = knownFieldNames.filter((name) => OBJECT_FIELD_TYPES.has(module.fields[name]!.type ?? ""));
   for (const actual of actualFieldPaths) {
+    if (objectFields.some((name) => actual.startsWith(`${name}.`))) continue;
     if (!knownFieldNames.includes(actual)) {
       const suggestion = nearestFieldName(actual, knownFieldNames);
       const suffix = suggestion ? ` Did you mean "${suggestion}"?` : "";
@@ -660,9 +625,21 @@ docs/design-contract.md):
                                 no token in tokens.json actually produces
   UNREFERENCED_ASSET            a file under assets/ no composition field
                                 references
-  UNDOCUMENTED_DESIGN_SELECTOR  overrides.css uses a selector that isn't
-                                part of the (currently category-listing-
-                                only) Design Surface Registry
+  Design hooks (needs --capabilities; the HUB's exported design contract
+  is the only source of public hooks):
+  INTERNAL_HUB_CLASS            a class of a HUB module that is not one of
+                                its public hooks (may change without notice)
+  UNKNOWN_DESIGN_CLASS          a class that is no public HUB hook and not
+                                inside your own custom component
+  MARKUP_ELEMENT_SELECTOR       an element selector (h2, a, …) that depends
+                                on the HUB's inner markup
+  UNKNOWN_LAYOUT_REGION         [data-hub-region="…"] with an id that is not
+                                a slot or region of this package's layout
+  UNKNOWN_DESIGN_SELECTOR       an attribute or selector that is no public
+                                hook, or that could not be parsed
+  DESIGN_CONTRACT_VERSION       the catalog has no design contract (older
+                                HUB — not verifiable) or a newer one than
+                                this heps-cli understands
   MISSING_REQUIRED_MODULE_FIELD  (needs --capabilities) a composition
                                 slot omits a field its module requires
   UNKNOWN_MODULE_FIELD          (needs --capabilities) a composition

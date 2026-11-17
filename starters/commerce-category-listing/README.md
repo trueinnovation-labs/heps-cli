@@ -9,9 +9,9 @@ demonstrated here first, and `heps inspect` (both with and without
 `--capabilities`) reports **zero warnings** against this starter's own
 files — a package-owned Layout, an open Theme with every token
 consumed, a real referenced Asset, a Composition using a real HUB
-module's real fields, and CSS that only ever targets the [Design
-Surface Registry](../../docs/contracts/design-surfaces/)'s six
-committed selectors. If a new HEPS capability doesn't work here, it
+module's real fields, and CSS that only ever targets **public hooks**
+of the target HUB (its exported design contract, see
+[`css-hooks.md`](../../docs/contracts/css-hooks.md)). If a new HEPS capability doesn't work here, it
 isn't done yet.
 
 **Listing only.** The HUB resolves a category to one of two different
@@ -120,15 +120,15 @@ working example of the format, not the format's full coverage.
 
 ## Stable CSS hooks
 
-What "stable" means here, the two governance mechanisms behind it, and
-the honest gap (no general, any-HUB CSS Hook Contract exists yet) are
-covered in [`docs/contracts/css-hooks.md`](../../docs/contracts/css-hooks.md).
-This starter's own six, concretely:
+Which hooks a HUB guarantees and how `heps inspect --capabilities`
+checks them is covered in [`docs/contracts/css-hooks.md`](../../docs/contracts/css-hooks.md).
+The hooks this starter uses, concretely (all exported by the HUB's
+capability catalog):
 
 | Selector | What it is | Why it's stable |
 |---|---|---|
 | `.category-promo-banner__title` | this starter's own intro title | `category-promo-banner`'s manifest declares it as a public `theme.elements` hook — checked by the HUB's own governance tests, not just convention |
-| `.category-product-nav` | the filter/product-count bar | Outlet-rendered (HUB Runtime, not a module) — committed via a HUB-side regression test |
+| `.category-product-nav` | the filter/product-count bar | Outlet hook — declared by the HUB (`outletHooks` in the catalog) and checked by HUB tests |
 | `.category-product-listing-grid` | the product grid's outer section | same as above |
 | `.product-teaser-card` | one product card, root | same as above |
 | `.product-teaser-card__image` | the product image inside a card | same as above |

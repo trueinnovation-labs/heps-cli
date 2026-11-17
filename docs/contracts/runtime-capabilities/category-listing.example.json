@@ -1,8 +1,11 @@
 {
   "version": "1",
+  "designContractVersion": 1,
   "modules": {
     "category-promo-banner": {
-      "surfaces": ["category"],
+      "surfaces": [
+        "category"
+      ],
       "allowedSlots": [
         "category.intro",
         "category.editorial",
@@ -19,20 +22,65 @@
         "women.closing"
       ],
       "fields": {
-        "eyebrow": { "type": "string", "required": false },
-        "title": { "type": "string", "required": true },
-        "description": { "type": "string", "required": true },
-        "imageUrl": { "type": "string", "required": false },
-        "presentation": { "type": "string", "required": false, "values": ["overlay", "split"] },
-        "cta.label": { "type": "string", "required": false },
-        "cta.href": { "type": "string", "required": false },
-        "media": { "type": "object", "required": false },
-        "priority": { "type": "boolean", "required": false }
+        "eyebrow": {
+          "type": "string",
+          "required": false
+        },
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "required": true
+        },
+        "imageUrl": {
+          "type": "string",
+          "required": false
+        },
+        "presentation": {
+          "type": "string",
+          "required": false,
+          "values": [
+            "overlay",
+            "split"
+          ]
+        },
+        "cta.label": {
+          "type": "string",
+          "required": false
+        },
+        "cta.href": {
+          "type": "string",
+          "required": false
+        },
+        "media": {
+          "type": "object",
+          "required": false
+        },
+        "priority": {
+          "type": "boolean",
+          "required": false
+        }
+      },
+      "theme": {
+        "root": ".category-promo-banner",
+        "elements": [
+          ".category-promo-banner__eyebrow",
+          ".category-promo-banner__title",
+          ".category-promo-banner__description",
+          ".category-promo-banner__media",
+          ".category-promo-banner__actions"
+        ],
+        "custom": false
       }
     }
   },
   "outlets": {
-    "category": ["productNavigation", "listingContent"]
+    "category": [
+      "productNavigation",
+      "listingContent"
+    ]
   },
   "tokens": {
     "consumed": [
@@ -42,5 +90,22 @@
       "color.text",
       "color.border"
     ]
+  },
+  "outletHooks": {
+    "category": {
+      "listingContent": [
+        ".category-product-listing-grid",
+        ".product-teaser-card",
+        ".product-teaser-card__image",
+        ".product-teaser-card__price"
+      ],
+      "productNavigation": [
+        ".category-product-nav"
+      ]
+    }
+  },
+  "layoutHooks": {
+    "attribute": "data-hub-region",
+    "ids": "slot ids and region ids of the package's own layout"
   }
 }
