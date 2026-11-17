@@ -342,6 +342,26 @@
         "backgroundImageUrl": {
           "type": "assetRef",
           "required": false
+        },
+        "primaryCtaVariant": {
+          "type": "string",
+          "required": false,
+          "values": [
+            "primary",
+            "secondary",
+            "ghost",
+            "link"
+          ]
+        },
+        "secondaryCtaVariant": {
+          "type": "string",
+          "required": false,
+          "values": [
+            "primary",
+            "secondary",
+            "ghost",
+            "link"
+          ]
         }
       }
     },
@@ -405,11 +425,19 @@
         },
         "title": {
           "type": "text",
-          "required": true
+          "required": true,
+          "requiredIf": {
+            "field": "contentRef",
+            "falsy": true
+          }
         },
         "body": {
           "type": "textarea",
-          "required": true
+          "required": true,
+          "requiredIf": {
+            "field": "contentRef",
+            "falsy": true
+          }
         },
         "ctaLabel": {
           "type": "text",
